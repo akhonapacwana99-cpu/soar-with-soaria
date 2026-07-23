@@ -9,61 +9,843 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as MarketingRouteImport } from './routes/_marketing'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as MarketingIndexRouteImport } from './routes/_marketing.index'
+import { Route as AppSoariaRouteImport } from './routes/app.soaria'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppReflectionRouteImport } from './routes/app.reflection'
+import { Route as AppReadinessRouteImport } from './routes/app.readiness'
+import { Route as AppProductivityRouteImport } from './routes/app.productivity'
+import { Route as AppPortfolioRouteImport } from './routes/app.portfolio'
+import { Route as AppOpportunitiesRouteImport } from './routes/app.opportunities'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppNotesRouteImport } from './routes/app.notes'
+import { Route as AppLinkedinRouteImport } from './routes/app.linkedin'
+import { Route as AppLearningRouteImport } from './routes/app.learning'
+import { Route as AppJourneyRouteImport } from './routes/app.journey'
+import { Route as AppInterviewRouteImport } from './routes/app.interview'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppHelpRouteImport } from './routes/app.help'
+import { Route as AppExplorerRouteImport } from './routes/app.explorer'
+import { Route as AppEmailRouteImport } from './routes/app.email'
+import { Route as AppDocumentsRouteImport } from './routes/app.documents'
+import { Route as AppDnaRouteImport } from './routes/app.dna'
+import { Route as AppCvRouteImport } from './routes/app.cv'
+import { Route as AppCoverLetterRouteImport } from './routes/app.cover-letter'
+import { Route as AppAtsRouteImport } from './routes/app.ats'
+import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
+import { Route as AppAboutRouteImport } from './routes/app.about'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as MarketingTermsRouteImport } from './routes/_marketing.terms'
+import { Route as MarketingSoariaRouteImport } from './routes/_marketing.soaria'
+import { Route as MarketingReflectionRouteImport } from './routes/_marketing.reflection'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing.privacy'
+import { Route as MarketingFeaturesRouteImport } from './routes/_marketing.features'
+import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
+import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
+import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
 
-const IndexRoute = IndexRouteImport.update({
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingRoute = MarketingRouteImport.update({
+  id: '/_marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const MarketingIndexRoute = MarketingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const AppSoariaRoute = AppSoariaRouteImport.update({
+  id: '/soaria',
+  path: '/soaria',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReflectionRoute = AppReflectionRouteImport.update({
+  id: '/reflection',
+  path: '/reflection',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReadinessRoute = AppReadinessRouteImport.update({
+  id: '/readiness',
+  path: '/readiness',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProductivityRoute = AppProductivityRouteImport.update({
+  id: '/productivity',
+  path: '/productivity',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPortfolioRoute = AppPortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOpportunitiesRoute = AppOpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesRoute = AppNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLinkedinRoute = AppLinkedinRouteImport.update({
+  id: '/linkedin',
+  path: '/linkedin',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLearningRoute = AppLearningRouteImport.update({
+  id: '/learning',
+  path: '/learning',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJourneyRoute = AppJourneyRouteImport.update({
+  id: '/journey',
+  path: '/journey',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInterviewRoute = AppInterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExplorerRoute = AppExplorerRouteImport.update({
+  id: '/explorer',
+  path: '/explorer',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmailRoute = AppEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDnaRoute = AppDnaRouteImport.update({
+  id: '/dna',
+  path: '/dna',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCvRoute = AppCvRouteImport.update({
+  id: '/cv',
+  path: '/cv',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCoverLetterRoute = AppCoverLetterRouteImport.update({
+  id: '/cover-letter',
+  path: '/cover-letter',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAtsRoute = AppAtsRouteImport.update({
+  id: '/ats',
+  path: '/ats',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAchievementsRoute = AppAchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAboutRoute = AppAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AppRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingTermsRoute = MarketingTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingSoariaRoute = MarketingSoariaRouteImport.update({
+  id: '/soaria',
+  path: '/soaria',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingReflectionRoute = MarketingReflectionRouteImport.update({
+  id: '/reflection',
+  path: '/reflection',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingFeaturesRoute = MarketingFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingFaqRoute = MarketingFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingContactRoute = MarketingContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingAboutRoute = MarketingAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => MarketingRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof MarketingIndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/about': typeof MarketingAboutRoute
+  '/contact': typeof MarketingContactRoute
+  '/faq': typeof MarketingFaqRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/reflection': typeof MarketingReflectionRoute
+  '/soaria': typeof MarketingSoariaRoute
+  '/terms': typeof MarketingTermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/app/about': typeof AppAboutRoute
+  '/app/achievements': typeof AppAchievementsRoute
+  '/app/ats': typeof AppAtsRoute
+  '/app/cover-letter': typeof AppCoverLetterRoute
+  '/app/cv': typeof AppCvRoute
+  '/app/dna': typeof AppDnaRoute
+  '/app/documents': typeof AppDocumentsRoute
+  '/app/email': typeof AppEmailRoute
+  '/app/explorer': typeof AppExplorerRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/journey': typeof AppJourneyRoute
+  '/app/learning': typeof AppLearningRoute
+  '/app/linkedin': typeof AppLinkedinRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/portfolio': typeof AppPortfolioRoute
+  '/app/productivity': typeof AppProductivityRoute
+  '/app/readiness': typeof AppReadinessRoute
+  '/app/reflection': typeof AppReflectionRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/soaria': typeof AppSoariaRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/about': typeof MarketingAboutRoute
+  '/contact': typeof MarketingContactRoute
+  '/faq': typeof MarketingFaqRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/reflection': typeof MarketingReflectionRoute
+  '/soaria': typeof MarketingSoariaRoute
+  '/terms': typeof MarketingTermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/app/about': typeof AppAboutRoute
+  '/app/achievements': typeof AppAchievementsRoute
+  '/app/ats': typeof AppAtsRoute
+  '/app/cover-letter': typeof AppCoverLetterRoute
+  '/app/cv': typeof AppCvRoute
+  '/app/dna': typeof AppDnaRoute
+  '/app/documents': typeof AppDocumentsRoute
+  '/app/email': typeof AppEmailRoute
+  '/app/explorer': typeof AppExplorerRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/journey': typeof AppJourneyRoute
+  '/app/learning': typeof AppLearningRoute
+  '/app/linkedin': typeof AppLinkedinRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/portfolio': typeof AppPortfolioRoute
+  '/app/productivity': typeof AppProductivityRoute
+  '/app/readiness': typeof AppReadinessRoute
+  '/app/reflection': typeof AppReflectionRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/soaria': typeof AppSoariaRoute
+  '/': typeof MarketingIndexRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_marketing': typeof MarketingRouteWithChildren
+  '/app': typeof AppRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_marketing/about': typeof MarketingAboutRoute
+  '/_marketing/contact': typeof MarketingContactRoute
+  '/_marketing/faq': typeof MarketingFaqRoute
+  '/_marketing/features': typeof MarketingFeaturesRoute
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/reflection': typeof MarketingReflectionRoute
+  '/_marketing/soaria': typeof MarketingSoariaRoute
+  '/_marketing/terms': typeof MarketingTermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/app/about': typeof AppAboutRoute
+  '/app/achievements': typeof AppAchievementsRoute
+  '/app/ats': typeof AppAtsRoute
+  '/app/cover-letter': typeof AppCoverLetterRoute
+  '/app/cv': typeof AppCvRoute
+  '/app/dna': typeof AppDnaRoute
+  '/app/documents': typeof AppDocumentsRoute
+  '/app/email': typeof AppEmailRoute
+  '/app/explorer': typeof AppExplorerRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/journey': typeof AppJourneyRoute
+  '/app/learning': typeof AppLearningRoute
+  '/app/linkedin': typeof AppLinkedinRoute
+  '/app/notes': typeof AppNotesRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/opportunities': typeof AppOpportunitiesRoute
+  '/app/portfolio': typeof AppPortfolioRoute
+  '/app/productivity': typeof AppProductivityRoute
+  '/app/readiness': typeof AppReadinessRoute
+  '/app/reflection': typeof AppReflectionRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/soaria': typeof AppSoariaRoute
+  '/_marketing/': typeof MarketingIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/sitemap.xml'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/privacy'
+    | '/reflection'
+    | '/soaria'
+    | '/terms'
+    | '/api/chat'
+    | '/app/about'
+    | '/app/achievements'
+    | '/app/ats'
+    | '/app/cover-letter'
+    | '/app/cv'
+    | '/app/dna'
+    | '/app/documents'
+    | '/app/email'
+    | '/app/explorer'
+    | '/app/help'
+    | '/app/history'
+    | '/app/interview'
+    | '/app/journey'
+    | '/app/learning'
+    | '/app/linkedin'
+    | '/app/notes'
+    | '/app/notifications'
+    | '/app/opportunities'
+    | '/app/portfolio'
+    | '/app/productivity'
+    | '/app/readiness'
+    | '/app/reflection'
+    | '/app/settings'
+    | '/app/soaria'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/sitemap.xml'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/privacy'
+    | '/reflection'
+    | '/soaria'
+    | '/terms'
+    | '/api/chat'
+    | '/app/about'
+    | '/app/achievements'
+    | '/app/ats'
+    | '/app/cover-letter'
+    | '/app/cv'
+    | '/app/dna'
+    | '/app/documents'
+    | '/app/email'
+    | '/app/explorer'
+    | '/app/help'
+    | '/app/history'
+    | '/app/interview'
+    | '/app/journey'
+    | '/app/learning'
+    | '/app/linkedin'
+    | '/app/notes'
+    | '/app/notifications'
+    | '/app/opportunities'
+    | '/app/portfolio'
+    | '/app/productivity'
+    | '/app/readiness'
+    | '/app/reflection'
+    | '/app/settings'
+    | '/app/soaria'
+    | '/'
+    | '/app'
+  id:
+    | '__root__'
+    | '/_marketing'
+    | '/app'
+    | '/sitemap.xml'
+    | '/_marketing/about'
+    | '/_marketing/contact'
+    | '/_marketing/faq'
+    | '/_marketing/features'
+    | '/_marketing/privacy'
+    | '/_marketing/reflection'
+    | '/_marketing/soaria'
+    | '/_marketing/terms'
+    | '/api/chat'
+    | '/app/about'
+    | '/app/achievements'
+    | '/app/ats'
+    | '/app/cover-letter'
+    | '/app/cv'
+    | '/app/dna'
+    | '/app/documents'
+    | '/app/email'
+    | '/app/explorer'
+    | '/app/help'
+    | '/app/history'
+    | '/app/interview'
+    | '/app/journey'
+    | '/app/learning'
+    | '/app/linkedin'
+    | '/app/notes'
+    | '/app/notifications'
+    | '/app/opportunities'
+    | '/app/portfolio'
+    | '/app/productivity'
+    | '/app/readiness'
+    | '/app/reflection'
+    | '/app/settings'
+    | '/app/soaria'
+    | '/_marketing/'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  MarketingRoute: typeof MarketingRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_marketing': {
+      id: '/_marketing'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_marketing/': {
+      id: '/_marketing/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/app/soaria': {
+      id: '/app/soaria'
+      path: '/soaria'
+      fullPath: '/app/soaria'
+      preLoaderRoute: typeof AppSoariaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/reflection': {
+      id: '/app/reflection'
+      path: '/reflection'
+      fullPath: '/app/reflection'
+      preLoaderRoute: typeof AppReflectionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/readiness': {
+      id: '/app/readiness'
+      path: '/readiness'
+      fullPath: '/app/readiness'
+      preLoaderRoute: typeof AppReadinessRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/productivity': {
+      id: '/app/productivity'
+      path: '/productivity'
+      fullPath: '/app/productivity'
+      preLoaderRoute: typeof AppProductivityRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/portfolio': {
+      id: '/app/portfolio'
+      path: '/portfolio'
+      fullPath: '/app/portfolio'
+      preLoaderRoute: typeof AppPortfolioRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/opportunities': {
+      id: '/app/opportunities'
+      path: '/opportunities'
+      fullPath: '/app/opportunities'
+      preLoaderRoute: typeof AppOpportunitiesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notes': {
+      id: '/app/notes'
+      path: '/notes'
+      fullPath: '/app/notes'
+      preLoaderRoute: typeof AppNotesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/linkedin': {
+      id: '/app/linkedin'
+      path: '/linkedin'
+      fullPath: '/app/linkedin'
+      preLoaderRoute: typeof AppLinkedinRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/learning': {
+      id: '/app/learning'
+      path: '/learning'
+      fullPath: '/app/learning'
+      preLoaderRoute: typeof AppLearningRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/journey': {
+      id: '/app/journey'
+      path: '/journey'
+      fullPath: '/app/journey'
+      preLoaderRoute: typeof AppJourneyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/interview': {
+      id: '/app/interview'
+      path: '/interview'
+      fullPath: '/app/interview'
+      preLoaderRoute: typeof AppInterviewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/help': {
+      id: '/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AppHelpRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/explorer': {
+      id: '/app/explorer'
+      path: '/explorer'
+      fullPath: '/app/explorer'
+      preLoaderRoute: typeof AppExplorerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/email': {
+      id: '/app/email'
+      path: '/email'
+      fullPath: '/app/email'
+      preLoaderRoute: typeof AppEmailRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/documents': {
+      id: '/app/documents'
+      path: '/documents'
+      fullPath: '/app/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/dna': {
+      id: '/app/dna'
+      path: '/dna'
+      fullPath: '/app/dna'
+      preLoaderRoute: typeof AppDnaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/cv': {
+      id: '/app/cv'
+      path: '/cv'
+      fullPath: '/app/cv'
+      preLoaderRoute: typeof AppCvRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/cover-letter': {
+      id: '/app/cover-letter'
+      path: '/cover-letter'
+      fullPath: '/app/cover-letter'
+      preLoaderRoute: typeof AppCoverLetterRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/ats': {
+      id: '/app/ats'
+      path: '/ats'
+      fullPath: '/app/ats'
+      preLoaderRoute: typeof AppAtsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/achievements': {
+      id: '/app/achievements'
+      path: '/achievements'
+      fullPath: '/app/achievements'
+      preLoaderRoute: typeof AppAchievementsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/about': {
+      id: '/app/about'
+      path: '/about'
+      fullPath: '/app/about'
+      preLoaderRoute: typeof AppAboutRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_marketing/terms': {
+      id: '/_marketing/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof MarketingTermsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/soaria': {
+      id: '/_marketing/soaria'
+      path: '/soaria'
+      fullPath: '/soaria'
+      preLoaderRoute: typeof MarketingSoariaRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/reflection': {
+      id: '/_marketing/reflection'
+      path: '/reflection'
+      fullPath: '/reflection'
+      preLoaderRoute: typeof MarketingReflectionRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/features': {
+      id: '/_marketing/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof MarketingFeaturesRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/faq': {
+      id: '/_marketing/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof MarketingFaqRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/contact': {
+      id: '/_marketing/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof MarketingContactRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/about': {
+      id: '/_marketing/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof MarketingAboutRouteImport
+      parentRoute: typeof MarketingRoute
     }
   }
 }
 
+interface MarketingRouteChildren {
+  MarketingAboutRoute: typeof MarketingAboutRoute
+  MarketingContactRoute: typeof MarketingContactRoute
+  MarketingFaqRoute: typeof MarketingFaqRoute
+  MarketingFeaturesRoute: typeof MarketingFeaturesRoute
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingReflectionRoute: typeof MarketingReflectionRoute
+  MarketingSoariaRoute: typeof MarketingSoariaRoute
+  MarketingTermsRoute: typeof MarketingTermsRoute
+  MarketingIndexRoute: typeof MarketingIndexRoute
+}
+
+const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingAboutRoute: MarketingAboutRoute,
+  MarketingContactRoute: MarketingContactRoute,
+  MarketingFaqRoute: MarketingFaqRoute,
+  MarketingFeaturesRoute: MarketingFeaturesRoute,
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingReflectionRoute: MarketingReflectionRoute,
+  MarketingSoariaRoute: MarketingSoariaRoute,
+  MarketingTermsRoute: MarketingTermsRoute,
+  MarketingIndexRoute: MarketingIndexRoute,
+}
+
+const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
+  MarketingRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAboutRoute: typeof AppAboutRoute
+  AppAchievementsRoute: typeof AppAchievementsRoute
+  AppAtsRoute: typeof AppAtsRoute
+  AppCoverLetterRoute: typeof AppCoverLetterRoute
+  AppCvRoute: typeof AppCvRoute
+  AppDnaRoute: typeof AppDnaRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
+  AppEmailRoute: typeof AppEmailRoute
+  AppExplorerRoute: typeof AppExplorerRoute
+  AppHelpRoute: typeof AppHelpRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppInterviewRoute: typeof AppInterviewRoute
+  AppJourneyRoute: typeof AppJourneyRoute
+  AppLearningRoute: typeof AppLearningRoute
+  AppLinkedinRoute: typeof AppLinkedinRoute
+  AppNotesRoute: typeof AppNotesRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppOpportunitiesRoute: typeof AppOpportunitiesRoute
+  AppPortfolioRoute: typeof AppPortfolioRoute
+  AppProductivityRoute: typeof AppProductivityRoute
+  AppReadinessRoute: typeof AppReadinessRoute
+  AppReflectionRoute: typeof AppReflectionRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSoariaRoute: typeof AppSoariaRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAboutRoute: AppAboutRoute,
+  AppAchievementsRoute: AppAchievementsRoute,
+  AppAtsRoute: AppAtsRoute,
+  AppCoverLetterRoute: AppCoverLetterRoute,
+  AppCvRoute: AppCvRoute,
+  AppDnaRoute: AppDnaRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
+  AppEmailRoute: AppEmailRoute,
+  AppExplorerRoute: AppExplorerRoute,
+  AppHelpRoute: AppHelpRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppInterviewRoute: AppInterviewRoute,
+  AppJourneyRoute: AppJourneyRoute,
+  AppLearningRoute: AppLearningRoute,
+  AppLinkedinRoute: AppLinkedinRoute,
+  AppNotesRoute: AppNotesRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppOpportunitiesRoute: AppOpportunitiesRoute,
+  AppPortfolioRoute: AppPortfolioRoute,
+  AppProductivityRoute: AppProductivityRoute,
+  AppReadinessRoute: AppReadinessRoute,
+  AppReflectionRoute: AppReflectionRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSoariaRoute: AppSoariaRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  MarketingRoute: MarketingRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
