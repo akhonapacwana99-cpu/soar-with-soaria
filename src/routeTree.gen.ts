@@ -9,50 +9,93 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketingRouteImport } from './routes/_marketing'
+import { Route as MarketingIndexRouteImport } from './routes/_marketing.index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
-const IndexRoute = IndexRouteImport.update({
+const MarketingRoute = MarketingRouteImport.update({
+  id: '/_marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof MarketingIndexRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/api/chat': typeof ApiChatRoute
+  '/': typeof MarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_marketing': typeof MarketingRouteWithChildren
+  '/api/chat': typeof ApiChatRoute
+  '/_marketing/': typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/api/chat' | '/'
+  id: '__root__' | '/_marketing' | '/api/chat' | '/_marketing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  MarketingRoute: typeof MarketingRouteWithChildren
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_marketing': {
+      id: '/_marketing'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_marketing/': {
+      id: '/_marketing/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface MarketingRouteChildren {
+  MarketingIndexRoute: typeof MarketingIndexRoute
+}
+
+const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingIndexRoute: MarketingIndexRoute,
+}
+
+const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
+  MarketingRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  MarketingRoute: MarketingRouteWithChildren,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
