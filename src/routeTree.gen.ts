@@ -9,8 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as MarketingRouteImport } from './routes/_marketing'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing.index'
+import { Route as AppSoariaRouteImport } from './routes/app.soaria'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as MarketingTermsRouteImport } from './routes/_marketing.terms'
 import { Route as MarketingSoariaRouteImport } from './routes/_marketing.soaria'
@@ -21,14 +24,29 @@ import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
 import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
 
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MarketingRoute,
+} as any)
+const AppSoariaRoute = AppSoariaRouteImport.update({
+  id: '/soaria',
+  path: '/soaria',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
@@ -78,6 +96,7 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
+  '/app': typeof AppRouteWithChildren
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
   '/faq': typeof MarketingFaqRoute
@@ -87,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/soaria': typeof MarketingSoariaRoute
   '/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
+  '/app/soaria': typeof AppSoariaRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/about': typeof MarketingAboutRoute
@@ -98,11 +119,14 @@ export interface FileRoutesByTo {
   '/soaria': typeof MarketingSoariaRoute
   '/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
+  '/app/soaria': typeof AppSoariaRoute
   '/': typeof MarketingIndexRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_marketing': typeof MarketingRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/faq': typeof MarketingFaqRoute
@@ -112,12 +136,15 @@ export interface FileRoutesById {
   '/_marketing/soaria': typeof MarketingSoariaRoute
   '/_marketing/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
+  '/app/soaria': typeof AppSoariaRoute
   '/_marketing/': typeof MarketingIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/about'
     | '/contact'
     | '/faq'
@@ -127,6 +154,8 @@ export interface FileRouteTypes {
     | '/soaria'
     | '/terms'
     | '/api/chat'
+    | '/app/soaria'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/about'
@@ -138,10 +167,13 @@ export interface FileRouteTypes {
     | '/soaria'
     | '/terms'
     | '/api/chat'
+    | '/app/soaria'
     | '/'
+    | '/app'
   id:
     | '__root__'
     | '/_marketing'
+    | '/app'
     | '/_marketing/about'
     | '/_marketing/contact'
     | '/_marketing/faq'
@@ -151,16 +183,26 @@ export interface FileRouteTypes {
     | '/_marketing/soaria'
     | '/_marketing/terms'
     | '/api/chat'
+    | '/app/soaria'
     | '/_marketing/'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_marketing': {
       id: '/_marketing'
       path: ''
@@ -168,12 +210,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_marketing/': {
       id: '/_marketing/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRoute
+    }
+    '/app/soaria': {
+      id: '/app/soaria'
+      path: '/soaria'
+      fullPath: '/app/soaria'
+      preLoaderRoute: typeof AppSoariaRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/chat': {
       id: '/api/chat'
@@ -269,8 +325,21 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
+interface AppRouteChildren {
+  AppSoariaRoute: typeof AppSoariaRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppSoariaRoute: AppSoariaRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
