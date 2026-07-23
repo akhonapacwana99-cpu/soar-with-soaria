@@ -12,6 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing.index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as MarketingTermsRouteImport } from './routes/_marketing.terms'
+import { Route as MarketingSoariaRouteImport } from './routes/_marketing.soaria'
+import { Route as MarketingReflectionRouteImport } from './routes/_marketing.reflection'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing.privacy'
+import { Route as MarketingFeaturesRouteImport } from './routes/_marketing.features'
+import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
+import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
+import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
 
 const MarketingRoute = MarketingRouteImport.update({
   id: '/_marketing',
@@ -27,27 +35,123 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingTermsRoute = MarketingTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingSoariaRoute = MarketingSoariaRouteImport.update({
+  id: '/soaria',
+  path: '/soaria',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingReflectionRoute = MarketingReflectionRouteImport.update({
+  id: '/reflection',
+  path: '/reflection',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingFeaturesRoute = MarketingFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingFaqRoute = MarketingFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingContactRoute = MarketingContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => MarketingRoute,
+} as any)
+const MarketingAboutRoute = MarketingAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => MarketingRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
+  '/about': typeof MarketingAboutRoute
+  '/contact': typeof MarketingContactRoute
+  '/faq': typeof MarketingFaqRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/reflection': typeof MarketingReflectionRoute
+  '/soaria': typeof MarketingSoariaRoute
+  '/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
+  '/about': typeof MarketingAboutRoute
+  '/contact': typeof MarketingContactRoute
+  '/faq': typeof MarketingFaqRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
+  '/reflection': typeof MarketingReflectionRoute
+  '/soaria': typeof MarketingSoariaRoute
+  '/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
   '/': typeof MarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_marketing': typeof MarketingRouteWithChildren
+  '/_marketing/about': typeof MarketingAboutRoute
+  '/_marketing/contact': typeof MarketingContactRoute
+  '/_marketing/faq': typeof MarketingFaqRoute
+  '/_marketing/features': typeof MarketingFeaturesRoute
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
+  '/_marketing/reflection': typeof MarketingReflectionRoute
+  '/_marketing/soaria': typeof MarketingSoariaRoute
+  '/_marketing/terms': typeof MarketingTermsRoute
   '/api/chat': typeof ApiChatRoute
   '/_marketing/': typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/privacy'
+    | '/reflection'
+    | '/soaria'
+    | '/terms'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/api/chat' | '/'
-  id: '__root__' | '/_marketing' | '/api/chat' | '/_marketing/'
+  to:
+    | '/about'
+    | '/contact'
+    | '/faq'
+    | '/features'
+    | '/privacy'
+    | '/reflection'
+    | '/soaria'
+    | '/terms'
+    | '/api/chat'
+    | '/'
+  id:
+    | '__root__'
+    | '/_marketing'
+    | '/_marketing/about'
+    | '/_marketing/contact'
+    | '/_marketing/faq'
+    | '/_marketing/features'
+    | '/_marketing/privacy'
+    | '/_marketing/reflection'
+    | '/_marketing/soaria'
+    | '/_marketing/terms'
+    | '/api/chat'
+    | '/_marketing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +182,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_marketing/terms': {
+      id: '/_marketing/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof MarketingTermsRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/soaria': {
+      id: '/_marketing/soaria'
+      path: '/soaria'
+      fullPath: '/soaria'
+      preLoaderRoute: typeof MarketingSoariaRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/reflection': {
+      id: '/_marketing/reflection'
+      path: '/reflection'
+      fullPath: '/reflection'
+      preLoaderRoute: typeof MarketingReflectionRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/features': {
+      id: '/_marketing/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof MarketingFeaturesRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/faq': {
+      id: '/_marketing/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof MarketingFaqRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/contact': {
+      id: '/_marketing/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof MarketingContactRouteImport
+      parentRoute: typeof MarketingRoute
+    }
+    '/_marketing/about': {
+      id: '/_marketing/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof MarketingAboutRouteImport
+      parentRoute: typeof MarketingRoute
+    }
   }
 }
 
 interface MarketingRouteChildren {
+  MarketingAboutRoute: typeof MarketingAboutRoute
+  MarketingContactRoute: typeof MarketingContactRoute
+  MarketingFaqRoute: typeof MarketingFaqRoute
+  MarketingFeaturesRoute: typeof MarketingFeaturesRoute
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
+  MarketingReflectionRoute: typeof MarketingReflectionRoute
+  MarketingSoariaRoute: typeof MarketingSoariaRoute
+  MarketingTermsRoute: typeof MarketingTermsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
 
 const MarketingRouteChildren: MarketingRouteChildren = {
+  MarketingAboutRoute: MarketingAboutRoute,
+  MarketingContactRoute: MarketingContactRoute,
+  MarketingFaqRoute: MarketingFaqRoute,
+  MarketingFeaturesRoute: MarketingFeaturesRoute,
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
+  MarketingReflectionRoute: MarketingReflectionRoute,
+  MarketingSoariaRoute: MarketingSoariaRoute,
+  MarketingTermsRoute: MarketingTermsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
 
