@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -47,6 +48,11 @@ import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
 import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -235,6 +241,7 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/app': typeof AppRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
   '/faq': typeof MarketingFaqRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/about': typeof MarketingAboutRoute
   '/contact': typeof MarketingContactRoute
   '/faq': typeof MarketingFaqRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_marketing': typeof MarketingRouteWithChildren
   '/app': typeof AppRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/contact': typeof MarketingContactRoute
   '/_marketing/faq': typeof MarketingFaqRoute
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/sitemap.xml'
     | '/about'
     | '/contact'
     | '/faq'
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/sitemap.xml'
     | '/about'
     | '/contact'
     | '/faq'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_marketing'
     | '/app'
+    | '/sitemap.xml'
     | '/_marketing/about'
     | '/_marketing/contact'
     | '/_marketing/faq'
@@ -467,11 +479,19 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   MarketingRoute: typeof MarketingRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
@@ -823,6 +843,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   MarketingRoute: MarketingRouteWithChildren,
   AppRoute: AppRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
