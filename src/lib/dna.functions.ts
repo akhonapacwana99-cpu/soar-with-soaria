@@ -93,10 +93,7 @@ TEXT:
       skills: toArr(parsed.skills),
       interests: toArr(parsed.interests),
       core_values: toArr(parsed.core_values),
-      learning_style:
-        parsed.learning_style && typeof parsed.learning_style === "object"
-          ? (parsed.learning_style as Record<string, unknown>)
-          : {},
+      learning_style: toStringMap(parsed.learning_style),
     };
   } catch {
     return null;
@@ -133,9 +130,9 @@ export async function updateDnaFromText(deviceId: string, text: string): Promise
     interests: mergeUnique(toArr(existing?.interests), signals.interests ?? []),
     core_values: mergeUnique(toArr(existing?.core_values), signals.core_values ?? []),
     learning_style: {
-      ...((existing?.learning_style as Record<string, unknown>) ?? {}),
+      ...toStringMap(existing?.learning_style),
       ...(signals.learning_style ?? {}),
-    },
+    } as Record<string, string>,
     source_count: (existing?.source_count ?? 0) + 1,
     updated_at: new Date().toISOString(),
   };
