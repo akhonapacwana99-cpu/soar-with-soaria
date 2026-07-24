@@ -47,6 +47,7 @@ import { Route as MarketingFeaturesRouteImport } from './routes/_marketing.featu
 import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
 import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
+import { Route as AppSoariaThreadIdRouteImport } from './routes/app.soaria.$threadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -237,6 +238,11 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => MarketingRoute,
 } as any)
+const AppSoariaThreadIdRoute = AppSoariaThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => AppSoariaRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
@@ -274,8 +280,9 @@ export interface FileRoutesByFullPath {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRoute
+  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/app/': typeof AppIndexRoute
+  '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -311,9 +318,10 @@ export interface FileRoutesByTo {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRoute
+  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/app': typeof AppIndexRoute
+  '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -352,9 +360,10 @@ export interface FileRoutesById {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRoute
+  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/app/': typeof AppIndexRoute
+  '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/soaria'
     | '/app/'
+    | '/app/soaria/$threadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sitemap.xml'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/app/soaria'
     | '/'
     | '/app'
+    | '/app/soaria/$threadId'
   id:
     | '__root__'
     | '/_marketing'
@@ -474,6 +485,7 @@ export interface FileRouteTypes {
     | '/app/soaria'
     | '/_marketing/'
     | '/app/'
+    | '/app/soaria/$threadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -751,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/app/soaria/$threadId': {
+      id: '/app/soaria/$threadId'
+      path: '/$threadId'
+      fullPath: '/app/soaria/$threadId'
+      preLoaderRoute: typeof AppSoariaThreadIdRouteImport
+      parentRoute: typeof AppSoariaRoute
+    }
   }
 }
 
@@ -782,6 +801,18 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
+interface AppSoariaRouteChildren {
+  AppSoariaThreadIdRoute: typeof AppSoariaThreadIdRoute
+}
+
+const AppSoariaRouteChildren: AppSoariaRouteChildren = {
+  AppSoariaThreadIdRoute: AppSoariaThreadIdRoute,
+}
+
+const AppSoariaRouteWithChildren = AppSoariaRoute._addFileChildren(
+  AppSoariaRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAboutRoute: typeof AppAboutRoute
   AppAchievementsRoute: typeof AppAchievementsRoute
@@ -806,7 +837,7 @@ interface AppRouteChildren {
   AppReadinessRoute: typeof AppReadinessRoute
   AppReflectionRoute: typeof AppReflectionRoute
   AppSettingsRoute: typeof AppSettingsRoute
-  AppSoariaRoute: typeof AppSoariaRoute
+  AppSoariaRoute: typeof AppSoariaRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -834,7 +865,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppReadinessRoute: AppReadinessRoute,
   AppReflectionRoute: AppReflectionRoute,
   AppSettingsRoute: AppSettingsRoute,
-  AppSoariaRoute: AppSoariaRoute,
+  AppSoariaRoute: AppSoariaRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
