@@ -2,50 +2,105 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
-const SOARIA_SYSTEM = `You are Soaria, the AI career coach inside CareerPilot AI — a human-centered career development platform designed and developed by Akhona Pacwana.
+const SOARIA_SYSTEM = `You are Soaria, the AI career coach inside CareerPilot AI, designed by Akhona Pacwana.
 
-Your role is mentor, teacher, coach, and thoughtful companion. You help students, graduates, professionals, and career changers discover their strengths, develop skills, prepare professional documents, explore opportunities, and confidently navigate every stage of their careers.
+You are mentor, teacher, coach, and thoughtful companion. Empower before advising. Progress over perfection. Success Delayed Is Not Success Denied.
 
-Core principles you live by:
-- Empower before advising.
-- Progress over perfection.
-- Learn before leading.
-- Opportunity begins with preparation.
-- Every story matters.
-- Success Delayed Is Not Success Denied.
+Communication: listen first, ask one thoughtful question when unclear, be warm and calm and professional, celebrate small wins, respect privacy and diversity, never fabricate facts, never guarantee jobs or outcomes, gently recommend qualified professionals for mental-health / medical / legal / financial matters.
 
-How you communicate:
-- Listen before advising. Ask one thoughtful question when the situation is unclear.
-- Be warm, calm, professional, and encouraging — never flattering or exaggerated.
-- Explain clearly. Use short paragraphs and, when useful, tight bulleted lists.
-- Celebrate small wins. Promote independent thinking.
-- Respect privacy, cultural diversity, and personal circumstances.
-- Never fabricate facts, statistics, employers, salaries, or program details.
-- Never guarantee jobs, admissions, or outcomes. Frame guidance as possibilities.
-- If a user needs mental-health, medical, legal, or financial expertise, gently recommend a qualified professional.
-
-Format responses in clean markdown. Keep the first reply of a new conversation grounded and grounding — help the person feel seen, then invite them into the next step.`;
+Format responses in clean markdown.`;
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as { messages?: unknown };
-        if (!Array.isArray(messages)) {
+        const body = (await request.json()) as {
+          messages?: unknown;
+          deviceId?: string;
+          threadId?: string;
+        };
+        if (!Array.isArray(body.messages)) {
           return new Response("Messages are required", { status: 400 });
         }
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
+        const messages = body.messages as UIMessage[];
+        const deviceId = body.deviceId;
+        const threadId = body.threadId;
+
+        // Persist the latest user message immediately.
+        if (deviceId && threadId) {
+          try {
+            const { getDb } = await import("@/lib/db.server");
+            const db = getDb();
+            const last = messages[messages.length - 1];
+            if (last && last.role === "user") {
+              const text = last.parts
+                .map((p) => (p.type === "text" ? p.text : ""))
+                .join("");
+              await db.from("chat_messages").insert({
+                thread_id: threadId,
+                device_id: deviceId,
+                role: "user",
+                content: text,
+                parts: last.parts as unknown as never,
+              });
+              await db
+                .from("chat_threads")
+                .update({ updated_at: new Date().toISOString() })
+                .eq("id", threadId)
+                .eq("device_id", deviceId);
+              // Auto-title from the first user message.
+              const { data: thread } = await db
+                .from("chat_threads")
+                .select("title")
+                .eq("id", threadId)
+                .maybeSingle();
+              if (thread && (thread.title === "New conversation" || !thread.title)) {
+                const title = text.replace(/\s+/g, " ").trim().slice(0, 60);
+                if (title) {
+                  await db
+                    .from("chat_threads")
+                    .update({ title })
+                    .eq("id", threadId)
+                    .eq("device_id", deviceId);
+                }
+              }
+            }
+          } catch (err) {
+            console.error("[chat] persist user message failed", err);
+          }
+        }
+
         const gateway = createLovableAiGatewayProvider(key);
         const result = streamText({
-          model: gateway("openai/gpt-5.5"),
+          model: gateway("google/gemini-3.6-flash"),
           system: SOARIA_SYSTEM,
-          messages: await convertToModelMessages(messages as UIMessage[]),
+          messages: await convertToModelMessages(messages),
+          onFinish: async ({ text }) => {
+            if (!deviceId || !threadId) return;
+            try {
+              const { getDb } = await import("@/lib/db.server");
+              await getDb()
+                .from("chat_messages")
+                .insert({
+                  thread_id: threadId,
+                  device_id: deviceId,
+                  role: "assistant",
+                  content: text,
+                  parts: [{ type: "text", text }] as unknown as never,
+                });
+              const { updateDnaFromText } = await import("@/lib/dna.functions");
+              await updateDnaFromText(deviceId, text);
+            } catch (err) {
+              console.error("[chat] persist assistant failed", err);
+            }
+          },
         });
 
         return result.toUIMessageStreamResponse({
-          originalMessages: messages as UIMessage[],
+          originalMessages: messages,
         });
       },
     },
