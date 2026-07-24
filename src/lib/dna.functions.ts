@@ -9,7 +9,7 @@ export type DnaRow = {
   skills: string[];
   interests: string[];
   core_values: string[];
-  learning_style: Record<string, unknown>;
+  learning_style: Record<string, string>;
   source_count: number;
   updated_at: string;
 };
@@ -46,11 +46,21 @@ export const getDna = createServerFn({ method: "POST" })
       skills: toArr(row.skills),
       interests: toArr(row.interests),
       core_values: toArr(row.core_values),
-      learning_style: (row.learning_style as Record<string, unknown>) ?? {},
+      learning_style: toStringMap(row.learning_style),
       source_count: row.source_count ?? 0,
       updated_at: row.updated_at,
     };
   });
+
+function toStringMap(v: unknown): Record<string, string> {
+  if (!v || typeof v !== "object") return {};
+  const out: Record<string, string> = {};
+  for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof val === "string") out[k] = val;
+    else if (val != null) out[k] = String(val);
+  }
+  return out;
+}
 
 async function extractSignals(text: string): Promise<Partial<DnaRow> | null> {
   const key = process.env.LOVABLE_API_KEY;
