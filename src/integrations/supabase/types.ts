@@ -14,7 +14,196 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      career_dna: {
+        Row: {
+          core_values: Json
+          device_id: string
+          interests: Json
+          learning_style: Json
+          skills: Json
+          source_count: number
+          strengths: Json
+          updated_at: string
+        }
+        Insert: {
+          core_values?: Json
+          device_id: string
+          interests?: Json
+          learning_style?: Json
+          skills?: Json
+          source_count?: number
+          strengths?: Json
+          updated_at?: string
+        }
+        Update: {
+          core_values?: Json
+          device_id?: string
+          interests?: Json
+          learning_style?: Json
+          skills?: Json
+          source_count?: number
+          strengths?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          device_id: string
+          id: string
+          parts: Json
+          role: string
+          thread_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          device_id: string
+          id?: string
+          parts?: Json
+          role: string
+          thread_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          device_id?: string
+          id?: string
+          parts?: Json
+          role?: string
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_threads: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      doc_folders: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          created_at: string
+          device_id: string
+          extracted_text: string | null
+          folder_id: string | null
+          id: string
+          mime: string
+          name: string
+          size: number
+          storage_path: string
+          summary: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          extracted_text?: string | null
+          folder_id?: string | null
+          id?: string
+          mime?: string
+          name: string
+          size?: number
+          storage_path: string
+          summary?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          extracted_text?: string | null
+          folder_id?: string | null
+          id?: string
+          mime?: string
+          name?: string
+          size?: number
+          storage_path?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "doc_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reflections: {
+        Row: {
+          created_at: string
+          device_id: string
+          entry: string
+          id: string
+          mood: number | null
+          prompt: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          entry: string
+          id?: string
+          mood?: number | null
+          prompt?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          entry?: string
+          id?: string
+          mood?: number | null
+          prompt?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
