@@ -36,7 +36,10 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row md:items-center">
           <p>© {new Date().getFullYear()} CareerPilot AI. All rights reserved.</p>
-          <p>Designed & Developed by <span className="font-medium text-foreground">Akhona Pacwana</span></p>
+          <p>
+            Designed, developed & owned by{" "}
+            <span className="font-medium text-foreground">Akhona Pacwana</span>
+          </p>
         </div>
       </div>
     </footer>
