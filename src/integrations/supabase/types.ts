@@ -177,6 +177,42 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          ai_useful: string | null
+          comments: string | null
+          created_at: string
+          ease_rating: number | null
+          id: string
+          issues: string | null
+          most_helpful_feature: string | null
+          overall_rating: number | null
+          wishes: string | null
+        }
+        Insert: {
+          ai_useful?: string | null
+          comments?: string | null
+          created_at?: string
+          ease_rating?: number | null
+          id?: string
+          issues?: string | null
+          most_helpful_feature?: string | null
+          overall_rating?: number | null
+          wishes?: string | null
+        }
+        Update: {
+          ai_useful?: string | null
+          comments?: string | null
+          created_at?: string
+          ease_rating?: number | null
+          id?: string
+          issues?: string | null
+          most_helpful_feature?: string | null
+          overall_rating?: number | null
+          wishes?: string | null
+        }
+        Relationships: []
+      }
       reflections: {
         Row: {
           created_at: string
