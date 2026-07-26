@@ -40,24 +40,52 @@ function SoariaThreadPage() {
   const [deviceId, setDeviceId] = useState<string>("");
   const [threads, setThreads] = useState<ThreadRow[]>([]);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const load = async (d: string) => {
+    setLoadError(null);
+    try {
+      const [ts, msgs] = await Promise.race([
+        Promise.all([
+          listThreads({ data: { deviceId: d } }),
+          getThreadMessages({ data: { deviceId: d, threadId } }),
+        ]),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), 15000)),
+      ]);
+      setThreads(ts);
+      setInitial(msgs.map(toUIMessage));
+    } catch (err) {
+      console.error("[soaria] thread load failed", err);
+      setLoadError("We couldn't load this conversation. Please try again.");
+      setInitial([]);
+    }
+  };
 
   useEffect(() => {
     const d = getDeviceId();
     setDeviceId(d);
-    (async () => {
-      const [ts, msgs] = await Promise.all([
-        listThreads({ data: { deviceId: d } }),
-        getThreadMessages({ data: { deviceId: d, threadId } }),
-      ]);
-      setThreads(ts);
-      setInitial(msgs.map(toUIMessage));
-    })();
+    setInitial(null);
+    void load(d);
   }, [threadId]);
 
   if (!deviceId || initial === null) {
     return (
       <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="max-w-md text-sm text-muted-foreground">{loadError}</p>
+        <button
+          onClick={() => { setInitial(null); void load(deviceId); }}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+        >
+          Try again
+        </button>
       </div>
     );
   }
@@ -106,10 +134,14 @@ function ChatBody({
     [deviceId, threadId],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, stop } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
+    onError: (err) => {
+      console.error("[soaria] chat error", err);
+      toast.error("Soaria couldn't reply. Please try again.");
+    },
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -122,6 +154,18 @@ function ChatBody({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, status]);
+
+  // Watchdog: if a request hangs (no bytes / no completion) for 60s, abort it
+  // so the UI never spins forever.
+  useEffect(() => {
+    if (status !== "submitted" && status !== "streaming") return;
+    const t = setTimeout(() => {
+      console.warn("[soaria] request watchdog aborting after 60s");
+      try { stop(); } catch { /* noop */ }
+      toast.error("Soaria took too long to respond. Please try again.");
+    }, 60000);
+    return () => clearTimeout(t);
+  }, [status, stop]);
 
   const busy = status === "submitted" || status === "streaming";
   const isEmpty = messages.length === 0;
@@ -234,8 +278,14 @@ function ChatBody({
                   </div>
                 )}
                 {error && (
-                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
-                    Something interrupted the reply. Try sending again.
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                    <span>{error.message || "Something interrupted the reply."}</span>
+                    <button
+                      onClick={() => submit(messages[messages.length - 1]?.parts.map((p) => (p.type === "text" ? p.text : "")).join("") || "")}
+                      className="rounded-md border border-destructive/40 px-2 py-1 text-xs hover:bg-destructive/10"
+                    >
+                      Retry
+                    </button>
                   </div>
                 )}
               </div>
