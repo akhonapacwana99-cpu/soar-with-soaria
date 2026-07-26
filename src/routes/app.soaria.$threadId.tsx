@@ -40,24 +40,52 @@ function SoariaThreadPage() {
   const [deviceId, setDeviceId] = useState<string>("");
   const [threads, setThreads] = useState<ThreadRow[]>([]);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const load = async (d: string) => {
+    setLoadError(null);
+    try {
+      const [ts, msgs] = await Promise.race([
+        Promise.all([
+          listThreads({ data: { deviceId: d } }),
+          getThreadMessages({ data: { deviceId: d, threadId } }),
+        ]),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), 15000)),
+      ]);
+      setThreads(ts);
+      setInitial(msgs.map(toUIMessage));
+    } catch (err) {
+      console.error("[soaria] thread load failed", err);
+      setLoadError("We couldn't load this conversation. Please try again.");
+      setInitial([]);
+    }
+  };
 
   useEffect(() => {
     const d = getDeviceId();
     setDeviceId(d);
-    (async () => {
-      const [ts, msgs] = await Promise.all([
-        listThreads({ data: { deviceId: d } }),
-        getThreadMessages({ data: { deviceId: d, threadId } }),
-      ]);
-      setThreads(ts);
-      setInitial(msgs.map(toUIMessage));
-    })();
+    setInitial(null);
+    void load(d);
   }, [threadId]);
 
   if (!deviceId || initial === null) {
     return (
       <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="max-w-md text-sm text-muted-foreground">{loadError}</p>
+        <button
+          onClick={() => { setInitial(null); void load(deviceId); }}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+        >
+          Try again
+        </button>
       </div>
     );
   }
