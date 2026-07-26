@@ -134,10 +134,14 @@ function ChatBody({
     [deviceId, threadId],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, stop } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
+    onError: (err) => {
+      console.error("[soaria] chat error", err);
+      toast.error("Soaria couldn't reply. Please try again.");
+    },
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -150,6 +154,18 @@ function ChatBody({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, status]);
+
+  // Watchdog: if a request hangs (no bytes / no completion) for 60s, abort it
+  // so the UI never spins forever.
+  useEffect(() => {
+    if (status !== "submitted" && status !== "streaming") return;
+    const t = setTimeout(() => {
+      console.warn("[soaria] request watchdog aborting after 60s");
+      try { stop(); } catch { /* noop */ }
+      toast.error("Soaria took too long to respond. Please try again.");
+    }, 60000);
+    return () => clearTimeout(t);
+  }, [status, stop]);
 
   const busy = status === "submitted" || status === "streaming";
   const isEmpty = messages.length === 0;
