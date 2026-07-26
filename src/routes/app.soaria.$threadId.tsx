@@ -278,8 +278,14 @@ function ChatBody({
                   </div>
                 )}
                 {error && (
-                  <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
-                    Something interrupted the reply. Try sending again.
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+                    <span>{error.message || "Something interrupted the reply."}</span>
+                    <button
+                      onClick={() => submit(messages[messages.length - 1]?.parts.map((p) => (p.type === "text" ? p.text : "")).join("") || "")}
+                      className="rounded-md border border-destructive/40 px-2 py-1 text-xs hover:bg-destructive/10"
+                    >
+                      Retry
+                    </button>
                   </div>
                 )}
               </div>
