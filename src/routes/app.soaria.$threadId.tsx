@@ -146,7 +146,7 @@ function ChatBody({
       console.warn("[soaria] request watchdog aborting after 60s");
       try { stop(); } catch { /* noop */ }
       toast.error("Soaria took too long to respond. Please try again.");
-    }, 60000);
+    }, STREAM_WATCHDOG_MS);
     return () => clearTimeout(t);
   }, [status, stop]);
 
