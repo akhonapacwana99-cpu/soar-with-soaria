@@ -12,7 +12,7 @@ import {
   getThreadMessages,
   listThreads,
 } from "@/lib/chat.functions";
-import { restoreThread, withTimeout, STREAM_WATCHDOG_MS } from "@/lib/chat-resilience";
+import { restoreThread, STREAM_WATCHDOG_MS } from "@/lib/chat-resilience";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/soaria/$threadId")({
