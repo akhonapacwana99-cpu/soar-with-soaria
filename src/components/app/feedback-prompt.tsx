@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { MessageSquareHeart, X } from "lucide-react";
 import { FeedbackDialog } from "./feedback-dialog";
+import { loadPreferences } from "@/lib/preferences";
 
 const STORAGE_KEY = "careerpilot:feedback:v1";
 const IDLE_MS = 4 * 60 * 1000; // 4 minutes of activity within the app
-const COOLDOWN_MS = 1000 * 60 * 60 * 24 * 14; // don't re-ask for 14 days
+const DAY_MS = 1000 * 60 * 60 * 24;
+const COOLDOWNS = { normal: DAY_MS * 14, rare: DAY_MS * 90, never: Infinity } as const;
 const DISMISSED = "dismissed";
 const SUBMITTED = "submitted";
+
 
 type State = { status?: string; lastAt?: number };
 
