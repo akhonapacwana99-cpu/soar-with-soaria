@@ -1,15 +1,22 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { FeedbackPrompt } from "@/components/app/feedback-prompt";
 import { DEVELOPER } from "@/lib/developer";
+import { applyTheme, loadPreferences } from "@/lib/preferences";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
 });
 
 function AppLayout() {
+  useEffect(() => {
+    applyTheme(loadPreferences().theme);
+  }, []);
+
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
