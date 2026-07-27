@@ -42,7 +42,7 @@ export const Route = createFileRoute("/app/settings")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: SettingsPage;
+  component: SettingsPage,
 });
 
 const THEMES: { value: ThemePref; label: string; icon: typeof Sun }[] = [
