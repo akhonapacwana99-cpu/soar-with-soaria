@@ -38,7 +38,10 @@ export function FeedbackPrompt() {
   useEffect(() => {
     const state = read();
     if (state.status === SUBMITTED) return;
-    if (state.lastAt && Date.now() - state.lastAt < COOLDOWN_MS) return;
+    const cooldown = COOLDOWNS[loadPreferences().feedbackFrequency] ?? COOLDOWNS.normal;
+    if (cooldown === Infinity) return;
+    if (state.lastAt && Date.now() - state.lastAt < cooldown) return;
+
 
     const t = window.setTimeout(() => setShowToast(true), IDLE_MS);
     return () => window.clearTimeout(t);
