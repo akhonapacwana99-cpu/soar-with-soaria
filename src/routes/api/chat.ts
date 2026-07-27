@@ -1,4 +1,5 @@
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { mapStreamError } from "@/lib/chat-resilience";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 
@@ -113,13 +114,7 @@ export const Route = createFileRoute("/api/chat")({
           onError: (error) => {
             const err = error as { statusCode?: number; message?: string };
             console.error("[chat] stream error", err?.statusCode, err?.message);
-            if (err?.statusCode === 402) {
-              return "Soaria is temporarily unavailable — the AI service is out of credits. Please try again later.";
-            }
-            if (err?.statusCode === 429) {
-              return "Soaria is receiving a lot of requests right now. Please wait a moment and try again.";
-            }
-            return "Something interrupted Soaria's reply. Please try again.";
+            return mapStreamError(error);
           },
         });
       },

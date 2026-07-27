@@ -12,6 +12,7 @@ import {
   getThreadMessages,
   listThreads,
 } from "@/lib/chat.functions";
+import { restoreThread, STREAM_WATCHDOG_MS } from "@/lib/chat-resilience";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/soaria/$threadId")({
@@ -20,20 +21,6 @@ export const Route = createFileRoute("/app/soaria/$threadId")({
 });
 
 type ThreadRow = { id: string; title: string; updated_at: string };
-type StoredMessage = {
-  id: string;
-  role: string;
-  content: string;
-  parts: unknown;
-  created_at: string;
-};
-
-function toUIMessage(m: StoredMessage): UIMessage {
-  const parts = Array.isArray(m.parts) && m.parts.length > 0
-    ? (m.parts as UIMessage["parts"])
-    : [{ type: "text" as const, text: m.content }];
-  return { id: m.id, role: m.role as UIMessage["role"], parts };
-}
 
 function SoariaThreadPage() {
   const { threadId } = Route.useParams();
@@ -44,22 +31,18 @@ function SoariaThreadPage() {
 
   const load = async (d: string) => {
     setLoadError(null);
-    try {
-      const [ts, msgs] = await Promise.race([
-        Promise.all([
-          listThreads({ data: { deviceId: d } }),
-          getThreadMessages({ data: { deviceId: d, threadId } }),
-        ]),
-        new Promise<never>((_, rej) => setTimeout(() => rej(new Error("timeout")), 15000)),
-      ]);
-      setThreads(ts);
-      setInitial(msgs.map(toUIMessage));
-    } catch (err) {
-      console.error("[soaria] thread load failed", err);
-      setLoadError("We couldn't load this conversation. Please try again.");
-      setInitial([]);
+    const result = await restoreThread({
+      listThreads: () => listThreads({ data: { deviceId: d } }),
+      getMessages: () => getThreadMessages({ data: { deviceId: d, threadId } }),
+    });
+    setThreads(result.threads);
+    setInitial(result.messages as unknown as UIMessage[]);
+    if (result.status === "error") {
+      console.error("[soaria] thread load failed", result.message);
+      setLoadError(result.message);
     }
   };
+
 
   useEffect(() => {
     const d = getDeviceId();
@@ -163,7 +146,7 @@ function ChatBody({
       console.warn("[soaria] request watchdog aborting after 60s");
       try { stop(); } catch { /* noop */ }
       toast.error("Soaria took too long to respond. Please try again.");
-    }, 60000);
+    }, STREAM_WATCHDOG_MS);
     return () => clearTimeout(t);
   }, [status, stop]);
 
