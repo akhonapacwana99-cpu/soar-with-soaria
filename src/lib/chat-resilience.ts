@@ -38,25 +38,34 @@ export function withTimeout<T>(
 
 /** Maps an AI gateway / transport error onto a calm, user-safe message. */
 export function mapStreamError(error: unknown): string {
-  const err = error as { statusCode?: number; status?: number; message?: string } | null;
-  const status = err?.statusCode ?? err?.status;
-  if (status === 402) {
-    return "Soaria is temporarily unavailable — the AI service is out of credits. Please try again later.";
+  const generic = "Something interrupted Soaria's reply. Please try again.";
+  try {
+    const err = error as { statusCode?: number; status?: number; message?: string } | null;
+    const raw = err?.statusCode ?? err?.status;
+    const status = typeof raw === "number" && Number.isFinite(raw) ? raw : undefined;
+    if (status === 402) {
+      return "Soaria is temporarily unavailable — the AI service is out of credits. Please try again later.";
+    }
+    if (status === 429) {
+      return "Soaria is receiving a lot of requests right now. Please wait a moment and try again.";
+    }
+    if (status === 401 || status === 403) {
+      return "Soaria couldn't authenticate with the AI service. Please try again shortly.";
+    }
+    if (status && status >= 500) {
+      return "The AI service is having trouble right now. Please try again in a moment.";
+    }
+    const message = typeof err?.message === "string" ? err.message : "";
+    if (error instanceof TimeoutError || /timeout|aborted/i.test(message)) {
+      return "Soaria took too long to respond. Please try again.";
+    }
+    return generic;
+  } catch {
+    // A hostile/throwing property accessor must never escape as an exception.
+    return generic;
   }
-  if (status === 429) {
-    return "Soaria is receiving a lot of requests right now. Please wait a moment and try again.";
-  }
-  if (status === 401 || status === 403) {
-    return "Soaria couldn't authenticate with the AI service. Please try again shortly.";
-  }
-  if (status && status >= 500) {
-    return "The AI service is having trouble right now. Please try again in a moment.";
-  }
-  if (error instanceof TimeoutError || /timeout|aborted/i.test(err?.message ?? "")) {
-    return "Soaria took too long to respond. Please try again.";
-  }
-  return "Something interrupted Soaria's reply. Please try again.";
 }
+
 
 export type StoredMessageLike = {
   id?: unknown;
