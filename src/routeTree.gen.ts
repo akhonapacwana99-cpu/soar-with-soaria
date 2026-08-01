@@ -14,7 +14,6 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as MarketingRouteImport } from './routes/_marketing'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing.index'
-import { Route as AppSoariaRouteImport } from './routes/app.soaria'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReflectionRouteImport } from './routes/app.reflection'
 import { Route as AppReadinessRouteImport } from './routes/app.readiness'
@@ -47,6 +46,7 @@ import { Route as MarketingFeaturesRouteImport } from './routes/_marketing.featu
 import { Route as MarketingFaqRouteImport } from './routes/_marketing.faq'
 import { Route as MarketingContactRouteImport } from './routes/_marketing.contact'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing.about'
+import { Route as AppSoariaIndexRouteImport } from './routes/app.soaria.index'
 import { Route as AppSoariaThreadIdRouteImport } from './routes/app.soaria.$threadId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -72,11 +72,6 @@ const MarketingIndexRoute = MarketingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => MarketingRoute,
-} as any)
-const AppSoariaRoute = AppSoariaRouteImport.update({
-  id: '/soaria',
-  path: '/soaria',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -238,10 +233,15 @@ const MarketingAboutRoute = MarketingAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => MarketingRoute,
 } as any)
+const AppSoariaIndexRoute = AppSoariaIndexRouteImport.update({
+  id: '/soaria/',
+  path: '/soaria/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSoariaThreadIdRoute = AppSoariaThreadIdRouteImport.update({
-  id: '/$threadId',
-  path: '/$threadId',
-  getParentRoute: () => AppSoariaRoute,
+  id: '/soaria/$threadId',
+  path: '/soaria/$threadId',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -280,9 +280,9 @@ export interface FileRoutesByFullPath {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/app/': typeof AppIndexRoute
   '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
+  '/app/soaria/': typeof AppSoariaIndexRoute
 }
 export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -318,10 +318,10 @@ export interface FileRoutesByTo {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/': typeof MarketingIndexRoute
   '/app': typeof AppIndexRoute
   '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
+  '/app/soaria': typeof AppSoariaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -360,10 +360,10 @@ export interface FileRoutesById {
   '/app/readiness': typeof AppReadinessRoute
   '/app/reflection': typeof AppReflectionRoute
   '/app/settings': typeof AppSettingsRoute
-  '/app/soaria': typeof AppSoariaRouteWithChildren
   '/_marketing/': typeof MarketingIndexRoute
   '/app/': typeof AppIndexRoute
   '/app/soaria/$threadId': typeof AppSoariaThreadIdRoute
+  '/app/soaria/': typeof AppSoariaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -403,9 +403,9 @@ export interface FileRouteTypes {
     | '/app/readiness'
     | '/app/reflection'
     | '/app/settings'
-    | '/app/soaria'
     | '/app/'
     | '/app/soaria/$threadId'
+    | '/app/soaria/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sitemap.xml'
@@ -441,10 +441,10 @@ export interface FileRouteTypes {
     | '/app/readiness'
     | '/app/reflection'
     | '/app/settings'
-    | '/app/soaria'
     | '/'
     | '/app'
     | '/app/soaria/$threadId'
+    | '/app/soaria'
   id:
     | '__root__'
     | '/_marketing'
@@ -482,10 +482,10 @@ export interface FileRouteTypes {
     | '/app/readiness'
     | '/app/reflection'
     | '/app/settings'
-    | '/app/soaria'
     | '/_marketing/'
     | '/app/'
     | '/app/soaria/$threadId'
+    | '/app/soaria/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -531,13 +531,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRoute
-    }
-    '/app/soaria': {
-      id: '/app/soaria'
-      path: '/soaria'
-      fullPath: '/app/soaria'
-      preLoaderRoute: typeof AppSoariaRouteImport
-      parentRoute: typeof AppRoute
     }
     '/app/settings': {
       id: '/app/settings'
@@ -763,12 +756,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRoute
     }
+    '/app/soaria/': {
+      id: '/app/soaria/'
+      path: '/soaria'
+      fullPath: '/app/soaria/'
+      preLoaderRoute: typeof AppSoariaIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/soaria/$threadId': {
       id: '/app/soaria/$threadId'
-      path: '/$threadId'
+      path: '/soaria/$threadId'
       fullPath: '/app/soaria/$threadId'
       preLoaderRoute: typeof AppSoariaThreadIdRouteImport
-      parentRoute: typeof AppSoariaRoute
+      parentRoute: typeof AppRoute
     }
   }
 }
@@ -801,18 +801,6 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
   MarketingRouteChildren,
 )
 
-interface AppSoariaRouteChildren {
-  AppSoariaThreadIdRoute: typeof AppSoariaThreadIdRoute
-}
-
-const AppSoariaRouteChildren: AppSoariaRouteChildren = {
-  AppSoariaThreadIdRoute: AppSoariaThreadIdRoute,
-}
-
-const AppSoariaRouteWithChildren = AppSoariaRoute._addFileChildren(
-  AppSoariaRouteChildren,
-)
-
 interface AppRouteChildren {
   AppAboutRoute: typeof AppAboutRoute
   AppAchievementsRoute: typeof AppAchievementsRoute
@@ -837,8 +825,9 @@ interface AppRouteChildren {
   AppReadinessRoute: typeof AppReadinessRoute
   AppReflectionRoute: typeof AppReflectionRoute
   AppSettingsRoute: typeof AppSettingsRoute
-  AppSoariaRoute: typeof AppSoariaRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppSoariaThreadIdRoute: typeof AppSoariaThreadIdRoute
+  AppSoariaIndexRoute: typeof AppSoariaIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -865,8 +854,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppReadinessRoute: AppReadinessRoute,
   AppReflectionRoute: AppReflectionRoute,
   AppSettingsRoute: AppSettingsRoute,
-  AppSoariaRoute: AppSoariaRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppSoariaThreadIdRoute: AppSoariaThreadIdRoute,
+  AppSoariaIndexRoute: AppSoariaIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -880,3 +870,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
