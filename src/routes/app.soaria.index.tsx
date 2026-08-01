@@ -4,7 +4,7 @@ import { Loader2, AlertTriangle } from "lucide-react";
 import { getDeviceId } from "@/lib/device-id";
 import { createThread, listThreads } from "@/lib/chat.functions";
 
-export const Route = createFileRoute("/app/soaria")({
+export const Route = createFileRoute("/app/soaria/")({
   head: () => ({
     meta: [
       { title: "Ask Soaria — CareerPilot AI" },
