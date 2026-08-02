@@ -178,7 +178,8 @@ function ChatBody({
     transport,
     onError: (err) => {
       console.error("[soaria] chat error", err);
-      toast.error("Soaria couldn't reply. Please try again.");
+      trackEvent("chat_stream_failed", { detail: mapStreamError(err) });
+      toast.error(mapStreamError(err));
     },
   });
 
@@ -200,6 +201,7 @@ function ChatBody({
     const t = setTimeout(() => {
       console.warn("[soaria] request watchdog aborting after 60s");
       try { stop(); } catch { /* noop */ }
+      trackEvent("chat_stream_timeout", { reason: "watchdog" });
       toast.error("Soaria took too long to respond. Please try again.");
     }, STREAM_WATCHDOG_MS);
     return () => clearTimeout(t);
