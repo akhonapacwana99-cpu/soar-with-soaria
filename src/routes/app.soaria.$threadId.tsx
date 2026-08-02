@@ -335,6 +335,7 @@ function ChatBody({
 
         <div className="border-t border-border bg-background/80 backdrop-blur-xl">
           <form
+            data-testid="chat-composer"
             className="mx-auto flex max-w-3xl items-end gap-2 px-4 py-4 md:px-6"
             onSubmit={(e) => {
               e.preventDefault();
