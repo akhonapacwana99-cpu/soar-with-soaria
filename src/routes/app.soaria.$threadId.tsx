@@ -135,7 +135,7 @@ function SoariaThreadPage() {
       deviceId={deviceId}
       threads={threads}
       setThreads={setThreads}
-      initialMessages={initial}
+      initialMessages={initial ?? []}
     />
   );
 }
