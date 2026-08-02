@@ -12,7 +12,7 @@ import {
   getThreadMessages,
   listThreads,
 } from "@/lib/chat.functions";
-import { restoreThread, STREAM_WATCHDOG_MS, LOAD_TIMEOUT_MS } from "@/lib/chat-resilience";
+import { restoreThread, STREAM_WATCHDOG_MS, LOAD_TIMEOUT_MS, mapStreamError } from "@/lib/chat-resilience";
 import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
 
