@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, Sparkles, Loader2, Plus, Trash2 } from "lucide-react";
+import { Send, Sparkles, Loader2, Plus, Trash2, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Logo } from "@/components/brand/logo";
 import { getDeviceId } from "@/lib/device-id";
@@ -12,7 +12,8 @@ import {
   getThreadMessages,
   listThreads,
 } from "@/lib/chat.functions";
-import { restoreThread, STREAM_WATCHDOG_MS } from "@/lib/chat-resilience";
+import { restoreThread, STREAM_WATCHDOG_MS, LOAD_TIMEOUT_MS, mapStreamError } from "@/lib/chat-resilience";
+import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/soaria/$threadId")({
@@ -27,51 +28,105 @@ function SoariaThreadPage() {
   const [deviceId, setDeviceId] = useState<string>("");
   const [threads, setThreads] = useState<ThreadRow[]>([]);
   const [initial, setInitial] = useState<UIMessage[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<{ message: string; detail: string } | null>(null);
+  const attempts = useRef(0);
+  const fallbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = async (d: string) => {
     setLoadError(null);
+    setInitial(null);
+    attempts.current += 1;
+    const attempt = attempts.current;
+
+    // Hard client-side fallback: even if the request promise never settles,
+    // the UI leaves the spinner and shows a recoverable error state.
+    if (fallbackTimer.current) clearTimeout(fallbackTimer.current);
+    fallbackTimer.current = setTimeout(() => {
+      if (attempt !== attempts.current) return;
+      setInitial((prev) => (prev === null ? ([] as UIMessage[]) : prev));
+      setLoadError((prev) =>
+        prev ?? {
+          message: "We couldn't load this conversation in time.",
+          detail: "The request never completed. Your connection may be offline.",
+        },
+      );
+      trackEvent("thread_load_failed", { reason: "client_fallback", detail: "never settled" });
+    }, LOAD_TIMEOUT_MS + 5000);
+
     const result = await restoreThread({
       listThreads: () => listThreads({ data: { deviceId: d } }),
       getMessages: () => getThreadMessages({ data: { deviceId: d, threadId } }),
+      onEvent: (e) =>
+        trackEvent(e.name as "thread_load_failed" | "resilience_fallback", {
+          reason: e.reason,
+          detail: e.detail,
+        }),
     });
+
+    if (attempt !== attempts.current) return;
+    if (fallbackTimer.current) clearTimeout(fallbackTimer.current);
     setThreads(result.threads);
     setInitial(result.messages as unknown as UIMessage[]);
     if (result.status === "error") {
-      console.error("[soaria] thread load failed", result.message);
-      setLoadError(result.message);
+      console.error("[soaria] thread load failed", result.reason, result.detail);
+      setLoadError({ message: result.message, detail: result.detail });
+    } else if (attempt > 1) {
+      trackEvent("thread_load_recovered", { detail: `attempt ${attempt}` });
     }
   };
-
 
   useEffect(() => {
     const d = getDeviceId();
     setDeviceId(d);
-    setInitial(null);
     void load(d);
+    return () => {
+      if (fallbackTimer.current) clearTimeout(fallbackTimer.current);
+    };
   }, [threadId]);
 
-  if (!deviceId || initial === null) {
+  if (!deviceId || (initial === null && !loadError)) {
     return (
-      <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center">
+      <div
+        data-testid="thread-loading"
+        className="flex h-[calc(100vh-3.5rem)] items-center justify-center"
+      >
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <span className="sr-only">Loading conversation…</span>
       </div>
     );
   }
 
   if (loadError) {
     return (
-      <div className="flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="max-w-md text-sm text-muted-foreground">{loadError}</p>
-        <button
-          onClick={() => { setInitial(null); void load(deviceId); }}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
-        >
-          Try again
-        </button>
+      <div
+        data-testid="thread-error"
+        className="flex h-[calc(100vh-3.5rem)] flex-col items-center justify-center gap-3 px-6 text-center"
+      >
+        <AlertTriangle className="h-7 w-7 text-destructive" />
+        <p className="max-w-md text-sm font-medium text-foreground">{loadError.message}</p>
+        <p className="max-w-md text-xs text-muted-foreground">{loadError.detail}</p>
+        <div className="mt-2 flex gap-2">
+          <button
+            data-testid="thread-retry"
+            onClick={() => {
+              trackEvent("thread_load_retry");
+              void load(deviceId || getDeviceId());
+            }}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Try again
+          </button>
+          <Link
+            to="/app"
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-accent/30"
+          >
+            Back to dashboard
+          </Link>
+        </div>
       </div>
     );
   }
+
 
   return (
     <ChatBody
@@ -80,7 +135,7 @@ function SoariaThreadPage() {
       deviceId={deviceId}
       threads={threads}
       setThreads={setThreads}
-      initialMessages={initial}
+      initialMessages={initial ?? []}
     />
   );
 }
@@ -123,7 +178,8 @@ function ChatBody({
     transport,
     onError: (err) => {
       console.error("[soaria] chat error", err);
-      toast.error("Soaria couldn't reply. Please try again.");
+      trackEvent("chat_stream_failed", { detail: mapStreamError(err) });
+      toast.error(mapStreamError(err));
     },
   });
 
@@ -145,6 +201,7 @@ function ChatBody({
     const t = setTimeout(() => {
       console.warn("[soaria] request watchdog aborting after 60s");
       try { stop(); } catch { /* noop */ }
+      trackEvent("chat_stream_timeout", { reason: "watchdog" });
       toast.error("Soaria took too long to respond. Please try again.");
     }, STREAM_WATCHDOG_MS);
     return () => clearTimeout(t);
@@ -278,6 +335,7 @@ function ChatBody({
 
         <div className="border-t border-border bg-background/80 backdrop-blur-xl">
           <form
+            data-testid="chat-composer"
             className="mx-auto flex max-w-3xl items-end gap-2 px-4 py-4 md:px-6"
             onSubmit={(e) => {
               e.preventDefault();
