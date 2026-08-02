@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, Sparkles, Loader2, Plus, Trash2 } from "lucide-react";
+import { Send, Sparkles, Loader2, Plus, Trash2, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Logo } from "@/components/brand/logo";
 import { getDeviceId } from "@/lib/device-id";
@@ -12,7 +12,8 @@ import {
   getThreadMessages,
   listThreads,
 } from "@/lib/chat.functions";
-import { restoreThread, STREAM_WATCHDOG_MS } from "@/lib/chat-resilience";
+import { restoreThread, STREAM_WATCHDOG_MS, LOAD_TIMEOUT_MS } from "@/lib/chat-resilience";
+import { trackEvent } from "@/lib/analytics";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/soaria/$threadId")({
