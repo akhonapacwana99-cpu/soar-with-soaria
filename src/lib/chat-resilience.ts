@@ -132,9 +132,37 @@ export function normalizeThreads(rows: unknown): ThreadLike[] {
     }));
 }
 
+export type RestoreFailureReason = "timeout" | "request_failed";
+
 export type RestoreResult =
   | { status: "ready"; threads: ThreadLike[]; messages: UIMessageLike[] }
-  | { status: "error"; message: string; threads: ThreadLike[]; messages: UIMessageLike[] };
+  | {
+      status: "error";
+      message: string;
+      reason: RestoreFailureReason;
+      detail: string;
+      threads: ThreadLike[];
+      messages: UIMessageLike[];
+    };
+
+/** Extracts a short, user-safe description of why a load failed. */
+export function describeLoadError(error: unknown): string {
+  if (error instanceof TimeoutError) return "The request timed out.";
+  try {
+    const err = error as { statusCode?: number; status?: number; message?: string } | null;
+    const raw = err?.statusCode ?? err?.status;
+    const status = typeof raw === "number" && Number.isFinite(raw) ? raw : undefined;
+    if (status === 404) return "This conversation no longer exists.";
+    if (status === 429) return "Too many requests right now.";
+    if (status && status >= 500) return "The server had trouble responding.";
+    const message = typeof err?.message === "string" ? err.message.trim() : "";
+    if (/fetch|network|offline/i.test(message)) return "The network request failed.";
+    if (message) return message.slice(0, 140);
+    return "An unexpected error occurred.";
+  } catch {
+    return "An unexpected error occurred.";
+  }
+}
 
 /**
  * Restores a conversation. Always resolves — never rejects, never hangs —
@@ -144,26 +172,44 @@ export async function restoreThread(deps: {
   listThreads: () => Promise<unknown>;
   getMessages: () => Promise<unknown>;
   timeoutMs?: number;
+  onEvent?: (event: { name: string; reason?: string; detail?: string }) => void;
 }): Promise<RestoreResult> {
   try {
     const [threads, messages] = await withTimeout(
       Promise.all([deps.listThreads(), deps.getMessages()]),
       deps.timeoutMs ?? LOAD_TIMEOUT_MS,
     );
+    const normalizedThreads = normalizeThreads(threads);
+    const normalizedMessages = normalizeStoredMessages(messages);
+    if (Array.isArray(threads) && normalizedThreads.length !== threads.length) {
+      deps.onEvent?.({ name: "resilience_fallback", reason: "malformed_threads" });
+    }
+    if (Array.isArray(messages) && normalizedMessages.length !== messages.length) {
+      deps.onEvent?.({ name: "resilience_fallback", reason: "malformed_messages" });
+    }
+    if (threads != null && !Array.isArray(threads)) {
+      deps.onEvent?.({ name: "resilience_fallback", reason: "non_array_threads" });
+    }
     return {
       status: "ready",
-      threads: normalizeThreads(threads),
-      messages: normalizeStoredMessages(messages),
+      threads: normalizedThreads,
+      messages: normalizedMessages,
     };
   } catch (error) {
+    const timedOut = error instanceof TimeoutError;
+    const reason: RestoreFailureReason = timedOut ? "timeout" : "request_failed";
+    const detail = describeLoadError(error);
+    deps.onEvent?.({ name: "thread_load_failed", reason, detail });
     return {
       status: "error",
-      message:
-        error instanceof TimeoutError
-          ? "We couldn't load this conversation in time. Please try again."
-          : "We couldn't load this conversation. Please try again.",
+      reason,
+      detail,
+      message: timedOut
+        ? "We couldn't load this conversation in time. Please try again."
+        : "We couldn't load this conversation. Please try again.",
       threads: [],
       messages: [],
     };
   }
 }
+
