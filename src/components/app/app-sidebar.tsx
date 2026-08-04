@@ -8,7 +8,7 @@ import {
   LayoutDashboard, MessageCircle, Sparkles, Trophy, Target,
   FolderKanban, FileText, Mail, FileSearch, Linkedin, Layers,
   Briefcase, GraduationCap, ListChecks, NotebookPen, Mic,
-  Compass, Heart, Award, History, Bell, Settings, HelpCircle, Info,
+  Compass, Heart, Award, History, Bell, Settings, HelpCircle, Info, Send,
 } from "lucide-react";
 
 type Item = { to: string; label: string; icon: any };
@@ -33,7 +33,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/app/ats", label: "ATS Checker", icon: FileSearch },
       { to: "/app/linkedin", label: "LinkedIn Optimizer", icon: Linkedin },
       { to: "/app/portfolio", label: "Portfolio Builder", icon: Layers },
-      { to: "/app/email", label: "Email Generator", icon: Mail },
+      { to: "/app/email", label: "Email Generator", icon: Send },
     ],
   },
   {
