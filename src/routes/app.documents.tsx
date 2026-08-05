@@ -194,6 +194,24 @@ function DocsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 md:px-8">
+      {review && (
+        <PdfImportReview
+          fileName={review.name}
+          pages={review.pages}
+          onCancel={() => setReview(null)}
+          onApply={async (text) => {
+            const target = review;
+            setReview(null);
+            try {
+              await updateDocText({ data: { deviceId, id: target.docId, extractedText: text } });
+              toast.success("Corrected text saved.");
+              await refreshDocs();
+            } catch {
+              toast.error("Couldn't save your corrections. Please try again.");
+            }
+          }}
+        />
+      )}
       <div className="mb-6 flex items-center gap-3">
         <FolderKanban className="h-6 w-6 text-primary" />
         <h1 className="font-display text-3xl font-semibold text-foreground md:text-4xl">
@@ -233,7 +251,7 @@ function DocsPage() {
         <section className="min-w-0">
           <label className="mb-4 flex cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card p-8 text-sm text-muted-foreground hover:border-primary">
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            <span>Click or drop files here (PDF, DOCX, TXT, MD, PNG, JPG · 10 MB max)</span>
+            <span>{uploadStatus || "Click or drop files here (PDF, DOCX, TXT, MD, PNG, JPG · 10 MB max)"}</span>
             <input
               ref={fileRef}
               type="file"
