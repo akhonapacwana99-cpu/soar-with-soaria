@@ -4,7 +4,9 @@ import type { LucideIcon } from "lucide-react";
 import { Copy, Download, FileDown, FileUp, Loader2, RefreshCw, Sparkles, History } from "lucide-react";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
-import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
+import { exportMarkdownToPdf, extractPdfDetailed } from "@/lib/pdf";
+import type { PageExtraction } from "@/lib/pdf";
+import { PdfImportReview } from "@/components/app/pdf-import-review";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
 
 
@@ -41,6 +43,8 @@ export function ToolStudio({
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Saved[]>([]);
   const importRef = useRef<HTMLInputElement>(null);
+  const [review, setReview] = useState<{ name: string; pages: PageExtraction[] } | null>(null);
+  const [importStatus, setImportStatus] = useState("");
   const [resultName, setResultName] = useState<string>(title);
 
 
@@ -104,23 +108,38 @@ export function ToolStudio({
     }
   };
 
+  const applyImported = (text: string, name: string) => {
+    if (!text.trim()) {
+      toast.error("No readable text found in that file.");
+      return;
+    }
+    const key = fields[0]?.key;
+    if (!key) return;
+    set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
+    toast.success(`Imported ${name}`);
+  };
+
   const importPdf = async (file: File | undefined) => {
     if (!file) return;
     setImporting(true);
+    setImportStatus("Reading…");
     try {
-      const text = /\.pdf$/i.test(file.name)
-        ? await extractPdfText(file)
-        : (await file.text()).slice(0, 200_000);
-      if (!text.trim()) {
-        toast.error("No readable text found in that file.");
+      if (!/\.pdf$/i.test(file.name)) {
+        applyImported((await file.text()).slice(0, 200_000), file.name);
         return;
       }
-      const key = fields[0]?.key;
-      if (!key) return;
-      set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
-      toast.success(`Imported ${file.name}`);
+      const res = await extractPdfDetailed(file, ({ page, total, stage }) =>
+        setImportStatus(stage === "ocr" ? `Running OCR on page ${page}/${total}…` : `Reading page ${page}/${total}…`),
+      );
+      if (res.needsReview.length > 0) {
+        setReview({ name: file.name, pages: res.pages });
+        return;
+      }
+      applyImported(res.text, file.name);
+      if (res.ocrUsed) toast.info("Some pages were scanned — Soaria read them with OCR.");
     } finally {
       setImporting(false);
+      setImportStatus("");
       if (importRef.current) importRef.current.value = "";
     }
   };
@@ -128,6 +147,17 @@ export function ToolStudio({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
+      {review && (
+        <PdfImportReview
+          fileName={review.name}
+          pages={review.pages}
+          onCancel={() => setReview(null)}
+          onApply={(text) => {
+            applyImported(text, review.name);
+            setReview(null);
+          }}
+        />
+      )}
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-gradient-brand text-primary-foreground">
           <Icon className="h-5 w-5" />
@@ -148,7 +178,7 @@ export function ToolStudio({
               className="inline-flex flex-none items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
             >
               {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
-              Import PDF
+              {importing ? importStatus || "Importing…" : "Import PDF"}
             </button>
             <input
               ref={importRef}

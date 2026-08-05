@@ -5,7 +5,9 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
 import { supabase } from "@/integrations/supabase/client";
-import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
+import { exportMarkdownToPdf, extractPdfDetailed, extractPdfTextLayer } from "@/lib/pdf";
+import type { PageExtraction } from "@/lib/pdf";
+import { PdfImportReview } from "@/components/app/pdf-import-review";
 import {
   createFolder,
   deleteDoc,
@@ -37,7 +39,7 @@ async function readText(file: File): Promise<string> {
     return (await file.text()).slice(0, 200_000);
   }
   if (/\.pdf$/i.test(file.name) || file.type === "application/pdf") {
-    return await extractPdfText(file);
+    return await extractPdfTextLayer(file);
   }
   return "";
 }
