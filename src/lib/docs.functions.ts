@@ -156,3 +156,22 @@ export const summarizeDoc = createServerFn({ method: "POST" })
     }
     return { summary };
   });
+
+export const getDocText = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ deviceId: z.string(), id: z.string() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { getDb } = await import("./db.server");
+    const { data: row, error } = await getDb()
+      .from("documents")
+      .select("name, extracted_text, summary")
+      .eq("id", data.id)
+      .eq("device_id", data.deviceId)
+      .single();
+    if (error || !row) throw new Error("Document not found");
+    return {
+      name: row.name,
+      text: row.extracted_text ?? row.summary ?? "",
+    };
+  });
