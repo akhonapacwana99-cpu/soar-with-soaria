@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { LucideIcon } from "lucide-react";
-import { Copy, Download, Loader2, RefreshCw, Sparkles, History } from "lucide-react";
+import { Copy, Download, FileDown, FileUp, Loader2, RefreshCw, Sparkles, History } from "lucide-react";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
+import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
+
 
 export type ToolField = {
   key: string;
