@@ -298,13 +298,21 @@ function DocsPage() {
             <div className="prose prose-sm mt-4 max-w-none text-foreground">
               <ReactMarkdown>{preview.summary ?? ""}</ReactMarkdown>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-6 flex flex-wrap justify-end gap-2">
+              <button
+                onClick={() => exportPdf(preview)}
+                disabled={busy}
+                className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground disabled:opacity-50"
+              >
+                Download PDF
+              </button>
               <button
                 onClick={() => exportCleaned(preview)}
-                className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+                className="rounded-lg border border-border px-3 py-1.5 text-sm"
               >
                 Export cleaned .md
               </button>
+
               <button
                 onClick={() => setPreview(null)}
                 className="rounded-lg border border-border px-3 py-1.5 text-sm"
