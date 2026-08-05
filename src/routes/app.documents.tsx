@@ -150,6 +150,26 @@ function DocsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportPdf = async (doc: Doc) => {
+    setBusy(true);
+    try {
+      const { name, text } = await getDocText({ data: { deviceId, id: doc.id } });
+      const body = text?.trim() || doc.summary?.trim();
+      if (!body) {
+        toast.error("No readable text yet — run Summarize first.");
+        return;
+      }
+      await exportMarkdownToPdf(name.replace(/\.[^.]+$/, ""), body);
+      toast.success("PDF downloaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "PDF export failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+
+
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 md:px-8">
       <div className="mb-6 flex items-center gap-3">
