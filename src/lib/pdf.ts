@@ -134,11 +134,12 @@ export async function extractPdfDetailed(
     const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
     const limit = Math.min(pdf.numPages, 40);
 
-    let worker: Awaited<ReturnType<typeof import("tesseract.js").createWorker>> | null = null;
+    type OcrWorker = { recognize: (img: unknown) => Promise<{ data: { text?: string; confidence?: number } }>; terminate: () => Promise<unknown> };
+    let worker: OcrWorker | null = null;
     const getWorker = async () => {
       if (!worker) {
         const { createWorker } = await import("tesseract.js");
-        worker = await createWorker("eng");
+        worker = (await createWorker("eng")) as unknown as OcrWorker;
       }
       return worker;
     };
@@ -204,7 +205,7 @@ export async function extractPdfDetailed(
       pages.push(entry);
     }
 
-    if (worker) await worker.terminate().catch(() => undefined);
+    if (worker) await (worker as OcrWorker).terminate().catch(() => undefined);
   } catch {
     // Whole-document failure: report a single failed page so the UI can react.
     if (pages.length === 0) {
