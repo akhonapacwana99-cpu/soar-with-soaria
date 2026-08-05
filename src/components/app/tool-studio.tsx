@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import type { LucideIcon } from "lucide-react";
-import { Copy, Download, Loader2, RefreshCw, Sparkles, History } from "lucide-react";
+import { Copy, Download, FileDown, FileUp, Loader2, RefreshCw, Sparkles, History } from "lucide-react";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
+import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
+
 
 export type ToolField = {
   key: string;
@@ -35,8 +37,12 @@ export function ToolStudio({
   const [values, setValues] = useState<Record<string, string>>({});
   const [result, setResult] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Saved[]>([]);
+  const importRef = useRef<HTMLInputElement>(null);
+  const [resultName, setResultName] = useState<string>(title);
+
 
   useEffect(() => {
     const d = getDeviceId();
@@ -66,6 +72,7 @@ export function ToolStudio({
     try {
       const res = await generateDocument({ data: { deviceId, tool, inputs: values } });
       setResult(res.text);
+      setResultName(res.name || title);
       toast.success("Saved to your Document Workspace.");
       listGenerated({ data: { deviceId, tool } })
         .then(setHistory)
@@ -88,6 +95,37 @@ export function ToolStudio({
     URL.revokeObjectURL(url);
   };
 
+  const downloadPdf = async () => {
+    try {
+      await exportMarkdownToPdf(resultName || title, result);
+      toast.success("PDF downloaded");
+    } catch {
+      toast.error("Couldn't build the PDF. Please try again.");
+    }
+  };
+
+  const importPdf = async (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    try {
+      const text = /\.pdf$/i.test(file.name)
+        ? await extractPdfText(file)
+        : (await file.text()).slice(0, 200_000);
+      if (!text.trim()) {
+        toast.error("No readable text found in that file.");
+        return;
+      }
+      const key = fields[0]?.key;
+      if (!key) return;
+      set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
+      toast.success(`Imported ${file.name}`);
+    } finally {
+      setImporting(false);
+      if (importRef.current) importRef.current.value = "";
+    }
+  };
+
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
       <div className="flex items-start gap-3">
@@ -102,6 +140,24 @@ export function ToolStudio({
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">Have an existing PDF? Import it to prefill.</p>
+            <button
+              onClick={() => importRef.current?.click()}
+              disabled={importing}
+              className="inline-flex flex-none items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
+              Import PDF
+            </button>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".pdf,.txt,.md"
+              className="hidden"
+              onChange={(e) => importPdf(e.target.files?.[0])}
+            />
+          </div>
           <div className="space-y-4">
             {fields.map((f) => (
               <label key={f.key} className="block">
@@ -116,6 +172,7 @@ export function ToolStudio({
               </label>
             ))}
           </div>
+
           <button
             onClick={run}
             disabled={busy || !deviceId}
@@ -165,11 +222,18 @@ export function ToolStudio({
                   <Copy className="h-3.5 w-3.5" /> Copy
                 </button>
                 <button
+                  onClick={downloadPdf}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                >
+                  <FileDown className="h-3.5 w-3.5" /> Download PDF
+                </button>
+                <button
                   onClick={download}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
                 >
-                  <Download className="h-3.5 w-3.5" /> Download
+                  <Download className="h-3.5 w-3.5" /> .md
                 </button>
+
                 <button
                   onClick={run}
                   disabled={busy}

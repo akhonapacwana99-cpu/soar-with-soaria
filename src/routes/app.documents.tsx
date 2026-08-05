@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FolderKanban, FolderPlus, Upload, FileText, Trash2, Sparkles, Loader2, Download } from "lucide-react";
+import { FolderKanban, FolderPlus, Upload, FileText, Trash2, Sparkles, Loader2, Download, FileDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
 import { supabase } from "@/integrations/supabase/client";
+import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
 import {
   createFolder,
   deleteDoc,
+  getDocText,
   listDocs,
   listFolders,
   registerDoc,
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/app/documents")({
   head: () => ({
     meta: [
       { title: "Document Workspace — CareerPilot AI" },
-      { name: "description", content: "Upload, organize, summarize, and export your professional documents." },
+      { name: "description", content: "Upload, organize, summarize, and export your professional documents as PDF." },
     ],
   }),
   component: DocsPage,
@@ -34,8 +36,12 @@ async function readText(file: File): Promise<string> {
   if (/\.(txt|md)$/i.test(file.name) || file.type.startsWith("text/")) {
     return (await file.text()).slice(0, 200_000);
   }
+  if (/\.pdf$/i.test(file.name) || file.type === "application/pdf") {
+    return await extractPdfText(file);
+  }
   return "";
 }
+
 
 function DocsPage() {
   const [deviceId, setDeviceId] = useState("");
@@ -144,6 +150,26 @@ function DocsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportPdf = async (doc: Doc) => {
+    setBusy(true);
+    try {
+      const { name, text } = await getDocText({ data: { deviceId, id: doc.id } });
+      const body = text?.trim() || doc.summary?.trim();
+      if (!body) {
+        toast.error("No readable text yet — run Summarize first.");
+        return;
+      }
+      await exportMarkdownToPdf(name.replace(/\.[^.]+$/, ""), body);
+      toast.success("PDF downloaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "PDF export failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+
+
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 md:px-8">
       <div className="mb-6 flex items-center gap-3">
@@ -219,7 +245,7 @@ function DocsPage() {
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap justify-end gap-1">
                     <button
                       onClick={() => doSummarize(d)}
                       disabled={busy}
@@ -229,12 +255,21 @@ function DocsPage() {
                       Summarize
                     </button>
                     <button
+                      onClick={() => exportPdf(d)}
+                      disabled={busy}
+                      className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                    >
+                      <FileDown className="mr-1 inline h-3 w-3" />
+                      PDF
+                    </button>
+                    <button
                       onClick={() => exportCleaned(d)}
                       className="rounded-md bg-muted px-2 py-1 text-xs text-foreground hover:bg-muted/70"
                     >
                       <Download className="mr-1 inline h-3 w-3" />
-                      Export
+                      .md
                     </button>
+
                     <button
                       onClick={() => remove(d)}
                       className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"
@@ -263,13 +298,21 @@ function DocsPage() {
             <div className="prose prose-sm mt-4 max-w-none text-foreground">
               <ReactMarkdown>{preview.summary ?? ""}</ReactMarkdown>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-6 flex flex-wrap justify-end gap-2">
+              <button
+                onClick={() => exportPdf(preview)}
+                disabled={busy}
+                className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground disabled:opacity-50"
+              >
+                Download PDF
+              </button>
               <button
                 onClick={() => exportCleaned(preview)}
-                className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground"
+                className="rounded-lg border border-border px-3 py-1.5 text-sm"
               >
                 Export cleaned .md
               </button>
+
               <button
                 onClick={() => setPreview(null)}
                 className="rounded-lg border border-border px-3 py-1.5 text-sm"
