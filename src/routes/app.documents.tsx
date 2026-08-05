@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { FolderKanban, FolderPlus, Upload, FileText, Trash2, Sparkles, Loader2, Download } from "lucide-react";
+import { FolderKanban, FolderPlus, Upload, FileText, Trash2, Sparkles, Loader2, Download, FileDown } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { getDeviceId } from "@/lib/device-id";
 import { supabase } from "@/integrations/supabase/client";
+import { exportMarkdownToPdf, extractPdfText } from "@/lib/pdf";
 import {
   createFolder,
   deleteDoc,
+  getDocText,
   listDocs,
   listFolders,
   registerDoc,
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/app/documents")({
   head: () => ({
     meta: [
       { title: "Document Workspace — CareerPilot AI" },
-      { name: "description", content: "Upload, organize, summarize, and export your professional documents." },
+      { name: "description", content: "Upload, organize, summarize, and export your professional documents as PDF." },
     ],
   }),
   component: DocsPage,
@@ -34,8 +36,12 @@ async function readText(file: File): Promise<string> {
   if (/\.(txt|md)$/i.test(file.name) || file.type.startsWith("text/")) {
     return (await file.text()).slice(0, 200_000);
   }
+  if (/\.pdf$/i.test(file.name) || file.type === "application/pdf") {
+    return await extractPdfText(file);
+  }
   return "";
 }
+
 
 function DocsPage() {
   const [deviceId, setDeviceId] = useState("");
