@@ -245,7 +245,7 @@ function DocsPage() {
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap justify-end gap-1">
                     <button
                       onClick={() => doSummarize(d)}
                       disabled={busy}
@@ -255,12 +255,21 @@ function DocsPage() {
                       Summarize
                     </button>
                     <button
+                      onClick={() => exportPdf(d)}
+                      disabled={busy}
+                      className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                    >
+                      <FileDown className="mr-1 inline h-3 w-3" />
+                      PDF
+                    </button>
+                    <button
                       onClick={() => exportCleaned(d)}
                       className="rounded-md bg-muted px-2 py-1 text-xs text-foreground hover:bg-muted/70"
                     >
                       <Download className="mr-1 inline h-3 w-3" />
-                      Export
+                      .md
                     </button>
+
                     <button
                       onClick={() => remove(d)}
                       className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"
