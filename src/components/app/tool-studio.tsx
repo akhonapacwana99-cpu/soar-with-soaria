@@ -72,6 +72,7 @@ export function ToolStudio({
     try {
       const res = await generateDocument({ data: { deviceId, tool, inputs: values } });
       setResult(res.text);
+      setResultName(res.name || title);
       toast.success("Saved to your Document Workspace.");
       listGenerated({ data: { deviceId, tool } })
         .then(setHistory)
@@ -93,6 +94,37 @@ export function ToolStudio({
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  const downloadPdf = async () => {
+    try {
+      await exportMarkdownToPdf(resultName || title, result);
+      toast.success("PDF downloaded");
+    } catch {
+      toast.error("Couldn't build the PDF. Please try again.");
+    }
+  };
+
+  const importPdf = async (file: File | undefined) => {
+    if (!file) return;
+    setImporting(true);
+    try {
+      const text = /\.pdf$/i.test(file.name)
+        ? await extractPdfText(file)
+        : (await file.text()).slice(0, 200_000);
+      if (!text.trim()) {
+        toast.error("No readable text found in that file.");
+        return;
+      }
+      const key = fields[0]?.key;
+      if (!key) return;
+      set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
+      toast.success(`Imported ${file.name}`);
+    } finally {
+      setImporting(false);
+      if (importRef.current) importRef.current.value = "";
+    }
+  };
+
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-8">
