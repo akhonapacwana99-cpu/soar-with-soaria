@@ -175,3 +175,20 @@ export const getDocText = createServerFn({ method: "POST" })
       text: row.extracted_text ?? row.summary ?? "",
     };
   });
+
+export const updateDocText = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({ deviceId: z.string(), id: z.string(), extractedText: z.string().max(200_000) })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { getDb } = await import("./db.server");
+    const { error } = await getDb()
+      .from("documents")
+      .update({ extracted_text: data.extractedText })
+      .eq("id", data.id)
+      .eq("device_id", data.deviceId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
