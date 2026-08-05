@@ -140,6 +140,24 @@ export function ToolStudio({
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">Have an existing PDF? Import it to prefill.</p>
+            <button
+              onClick={() => importRef.current?.click()}
+              disabled={importing}
+              className="inline-flex flex-none items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
+              {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileUp className="h-3.5 w-3.5" />}
+              Import PDF
+            </button>
+            <input
+              ref={importRef}
+              type="file"
+              accept=".pdf,.txt,.md"
+              className="hidden"
+              onChange={(e) => importPdf(e.target.files?.[0])}
+            />
+          </div>
           <div className="space-y-4">
             {fields.map((f) => (
               <label key={f.key} className="block">
@@ -154,6 +172,7 @@ export function ToolStudio({
               </label>
             ))}
           </div>
+
           <button
             onClick={run}
             disabled={busy || !deviceId}
