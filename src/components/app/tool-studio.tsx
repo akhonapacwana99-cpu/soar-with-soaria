@@ -222,11 +222,18 @@ export function ToolStudio({
                   <Copy className="h-3.5 w-3.5" /> Copy
                 </button>
                 <button
+                  onClick={downloadPdf}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                >
+                  <FileDown className="h-3.5 w-3.5" /> Download PDF
+                </button>
+                <button
                   onClick={download}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
                 >
-                  <Download className="h-3.5 w-3.5" /> Download
+                  <Download className="h-3.5 w-3.5" /> .md
                 </button>
+
                 <button
                   onClick={run}
                   disabled={busy}
