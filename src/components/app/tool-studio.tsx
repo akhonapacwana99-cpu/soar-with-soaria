@@ -37,8 +37,12 @@ export function ToolStudio({
   const [values, setValues] = useState<Record<string, string>>({});
   const [result, setResult] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<Saved[]>([]);
+  const importRef = useRef<HTMLInputElement>(null);
+  const [resultName, setResultName] = useState<string>(title);
+
 
   useEffect(() => {
     const d = getDeviceId();
