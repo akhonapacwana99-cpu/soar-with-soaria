@@ -16,6 +16,7 @@ import {
   listFolders,
   registerDoc,
   summarizeDoc,
+  updateDocText,
 } from "@/lib/docs.functions";
 
 export const Route = createFileRoute("/app/documents")({
@@ -53,6 +54,8 @@ function DocsPage() {
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState<Doc | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [review, setReview] = useState<{ name: string; docId: string; pages: PageExtraction[] } | null>(null);
+  const [uploadStatus, setUploadStatus] = useState("");
 
   useEffect(() => {
     const d = getDeviceId();
@@ -95,8 +98,23 @@ function DocsPage() {
           toast.error(`Upload failed: ${error.message}`);
           continue;
         }
-        const extracted = await readText(file);
-        await registerDoc({
+        const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+        let extracted = "";
+        let pending: PageExtraction[] | null = null;
+        if (isPdf) {
+          const res = await extractPdfDetailed(file, ({ page, total, stage }) =>
+            setUploadStatus(
+              stage === "ocr"
+                ? `${file.name}: OCR on page ${page}/${total}…`
+                : `${file.name}: reading page ${page}/${total}…`,
+            ),
+          );
+          extracted = res.text;
+          if (res.needsReview.length > 0) pending = res.pages;
+        } else {
+          extracted = await readText(file);
+        }
+        const row = await registerDoc({
           data: {
             deviceId,
             folderId: active,
@@ -107,11 +125,13 @@ function DocsPage() {
             extractedText: extracted,
           },
         });
+        if (pending && row?.id) setReview({ name: file.name, docId: row.id, pages: pending });
       }
       toast.success("Upload complete");
       await refreshDocs();
     } finally {
       setBusy(false);
+      setUploadStatus("");
       if (fileRef.current) fileRef.current.value = "";
     }
   };
