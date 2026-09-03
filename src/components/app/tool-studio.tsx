@@ -30,6 +30,7 @@ export function ToolStudio({
   description,
   fields,
   cta = "Generate with Soaria",
+  resumeKeys,
 }: {
   tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email";
   icon: LucideIcon;
@@ -37,6 +38,8 @@ export function ToolStudio({
   description: string;
   fields: ToolField[];
   cta?: string;
+  /** Maps saved resume columns to field keys; enables real resume prefill + save. */
+  resumeKeys?: Partial<Record<ResumeColumn, string>>;
 }) {
   const [deviceId, setDeviceId] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
