@@ -60,7 +60,7 @@ async function contextFor(deviceId: string) {
   try {
     const { getDb } = await import("./db.server");
     const db = getDb();
-    const [{ data: dna }, { data: docs }] = await Promise.all([
+    const [{ data: dna }, { data: docs }, { data: resume }] = await Promise.all([
       db.from("career_dna").select("*").eq("device_id", deviceId).maybeSingle(),
       db
         .from("documents")
