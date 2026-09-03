@@ -9,7 +9,12 @@ export type AnalyticsEventName =
   | "thread_load_recovered"
   | "chat_stream_failed"
   | "chat_stream_timeout"
-  | "resilience_fallback";
+  | "resilience_fallback"
+  // Document engagement: which drafts people actually open, download or import.
+  | "doc_download"
+  | "doc_open"
+  | "doc_import"
+  | "doc_import_failed";
 
 export type AnalyticsEvent = {
   name: AnalyticsEventName;
