@@ -52,15 +52,17 @@ export function ToolStudio({
   const [review, setReview] = useState<{ name: string; pages: PageExtraction[] } | null>(null);
   const [importStatus, setImportStatus] = useState("");
   const [resultName, setResultName] = useState<string>(title);
-
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
     const d = getDeviceId();
     setDeviceId(d);
+    let draftValues: Record<string, string> = {};
     const draft = localStorage.getItem(`studio:${tool}`);
     if (draft) {
       try {
-        setValues(JSON.parse(draft) as Record<string, string>);
+        draftValues = JSON.parse(draft) as Record<string, string>;
+        setValues(draftValues);
       } catch {
         /* ignore */
       }
@@ -68,6 +70,24 @@ export function ToolStudio({
     listGenerated({ data: { deviceId: d, tool } })
       .then(setHistory)
       .catch(() => setHistory([]));
+
+    if (!resumeKeys) return;
+    getResumeProfile({ data: { deviceId: d } })
+      .then((p) => {
+        const filled: Record<string, string> = {};
+        for (const [col, key] of Object.entries(resumeKeys) as [ResumeColumn, string][]) {
+          const saved = (p[col] ?? "").trim();
+          // Never clobber what the user already typed on this device.
+          if (saved && !(draftValues[key] ?? "").trim()) filled[key] = saved;
+        }
+        if (Object.keys(filled).length > 0) {
+          setValues((v) => ({ ...filled, ...v }));
+          toast.success("Filled in from your saved resume.");
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setProfileLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tool]);
 
   const set = (k: string, v: string) => {
