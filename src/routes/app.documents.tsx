@@ -7,6 +7,7 @@ import { getDeviceId } from "@/lib/device-id";
 import { supabase } from "@/integrations/supabase/client";
 import { exportMarkdownToPdf, extractPdfDetailed, extractPdfTextLayer } from "@/lib/pdf";
 import type { PageExtraction } from "@/lib/pdf";
+import { trackEvent } from "@/lib/analytics";
 import { PdfImportReview } from "@/components/app/pdf-import-review";
 import {
   createFolder,
@@ -124,6 +125,10 @@ function DocsPage() {
             ),
           );
           extracted = res.text;
+          trackEvent("doc_import", {
+            reason: res.needsReview.length > 0 ? "pdf_needs_review" : res.ocrUsed ? "pdf_ocr" : "pdf_text_layer",
+            detail: file.name,
+          });
           if (res.needsReview.length > 0) pending = res.pages;
         } else {
           extracted = await readText(file);
@@ -183,6 +188,7 @@ function DocsPage() {
     a.href = url;
     a.download = `${doc.name.replace(/\.[^.]+$/, "")}-cleaned.md`;
     a.click();
+    trackEvent("doc_download", { reason: "markdown", detail: doc.name });
     URL.revokeObjectURL(url);
   };
 
@@ -196,6 +202,7 @@ function DocsPage() {
         return;
       }
       await exportMarkdownToPdf(name.replace(/\.[^.]+$/, ""), body);
+      trackEvent("doc_download", { reason: "pdf", detail: doc.name });
       toast.success("PDF downloaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "PDF export failed");
