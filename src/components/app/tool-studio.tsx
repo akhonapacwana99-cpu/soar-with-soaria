@@ -8,7 +8,10 @@ import { exportMarkdownToPdf, extractPdfDetailed } from "@/lib/pdf";
 import type { PageExtraction } from "@/lib/pdf";
 import { PdfImportReview } from "@/components/app/pdf-import-review";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
+import { getResumeProfile, saveResumeProfile } from "@/lib/resume.functions";
+import type { ResumeProfile } from "@/lib/resume.functions";
 
+export type ResumeColumn = keyof Omit<ResumeProfile, "updated_at">;
 
 export type ToolField = {
   key: string;
