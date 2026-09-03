@@ -104,6 +104,20 @@ export function ToolStudio({
       setResult(res.text);
       setResultName(res.name || title);
       toast.success("Saved to your Document Workspace.");
+      if (resumeKeys && profileLoaded) {
+        const profile = {
+          target_role: "",
+          contact: "",
+          experience: "",
+          education: "",
+          skills: "",
+          extras: "",
+        } as Record<ResumeColumn, string>;
+        for (const [col, key] of Object.entries(resumeKeys) as [ResumeColumn, string][]) {
+          profile[col] = values[key] ?? "";
+        }
+        saveResumeProfile({ data: { deviceId, profile } }).catch(() => undefined);
+      }
       listGenerated({ data: { deviceId, tool } })
         .then(setHistory)
         .catch(() => undefined);
