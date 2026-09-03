@@ -20,6 +20,14 @@ export const Route = createFileRoute("/app/cv")({
       title="CV Builder"
       description="Give Soaria the raw facts. She shapes them into a clean, ATS-friendly CV with achievement-led bullets — never inventing anything you didn't say."
       cta="Build my CV"
+      resumeKeys={{
+        target_role: "Target role",
+        contact: "Your details",
+        experience: "Work experience",
+        education: "Education & certifications",
+        skills: "Skills & tools",
+        extras: "Anything else",
+      }}
       fields={[
         { key: "Target role", label: "Target role", placeholder: "e.g. Junior Data Analyst, Cape Town", rows: 1 },
         { key: "Your details", label: "Name & contact details", placeholder: "Full name, city, email, phone, LinkedIn", rows: 3 },

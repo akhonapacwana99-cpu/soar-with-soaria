@@ -8,7 +8,10 @@ import { exportMarkdownToPdf, extractPdfDetailed } from "@/lib/pdf";
 import type { PageExtraction } from "@/lib/pdf";
 import { PdfImportReview } from "@/components/app/pdf-import-review";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
+import { getResumeProfile, saveResumeProfile } from "@/lib/resume.functions";
+import type { ResumeProfile } from "@/lib/resume.functions";
 
+export type ResumeColumn = keyof Omit<ResumeProfile, "updated_at">;
 
 export type ToolField = {
   key: string;
@@ -27,6 +30,7 @@ export function ToolStudio({
   description,
   fields,
   cta = "Generate with Soaria",
+  resumeKeys,
 }: {
   tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email";
   icon: LucideIcon;
@@ -34,6 +38,8 @@ export function ToolStudio({
   description: string;
   fields: ToolField[];
   cta?: string;
+  /** Maps saved resume columns to field keys; enables real resume prefill + save. */
+  resumeKeys?: Partial<Record<ResumeColumn, string>>;
 }) {
   const [deviceId, setDeviceId] = useState("");
   const [values, setValues] = useState<Record<string, string>>({});
@@ -46,15 +52,17 @@ export function ToolStudio({
   const [review, setReview] = useState<{ name: string; pages: PageExtraction[] } | null>(null);
   const [importStatus, setImportStatus] = useState("");
   const [resultName, setResultName] = useState<string>(title);
-
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
     const d = getDeviceId();
     setDeviceId(d);
+    let draftValues: Record<string, string> = {};
     const draft = localStorage.getItem(`studio:${tool}`);
     if (draft) {
       try {
-        setValues(JSON.parse(draft) as Record<string, string>);
+        draftValues = JSON.parse(draft) as Record<string, string>;
+        setValues(draftValues);
       } catch {
         /* ignore */
       }
@@ -62,6 +70,24 @@ export function ToolStudio({
     listGenerated({ data: { deviceId: d, tool } })
       .then(setHistory)
       .catch(() => setHistory([]));
+
+    if (!resumeKeys) return;
+    getResumeProfile({ data: { deviceId: d } })
+      .then((p) => {
+        const filled: Record<string, string> = {};
+        for (const [col, key] of Object.entries(resumeKeys) as [ResumeColumn, string][]) {
+          const saved = (p[col] ?? "").trim();
+          // Never clobber what the user already typed on this device.
+          if (saved && !(draftValues[key] ?? "").trim()) filled[key] = saved;
+        }
+        if (Object.keys(filled).length > 0) {
+          setValues((v) => ({ ...filled, ...v }));
+          toast.success("Filled in from your saved resume.");
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => setProfileLoaded(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tool]);
 
   const set = (k: string, v: string) => {
@@ -78,6 +104,20 @@ export function ToolStudio({
       setResult(res.text);
       setResultName(res.name || title);
       toast.success("Saved to your Document Workspace.");
+      if (resumeKeys && profileLoaded) {
+        const profile = {
+          target_role: "",
+          contact: "",
+          experience: "",
+          education: "",
+          skills: "",
+          extras: "",
+        } as Record<ResumeColumn, string>;
+        for (const [col, key] of Object.entries(resumeKeys) as [ResumeColumn, string][]) {
+          profile[col] = values[key] ?? "";
+        }
+        saveResumeProfile({ data: { deviceId, profile } }).catch(() => undefined);
+      }
       listGenerated({ data: { deviceId, tool } })
         .then(setHistory)
         .catch(() => undefined);

@@ -60,7 +60,7 @@ async function contextFor(deviceId: string) {
   try {
     const { getDb } = await import("./db.server");
     const db = getDb();
-    const [{ data: dna }, { data: docs }] = await Promise.all([
+    const [{ data: dna }, { data: docs }, { data: resume }] = await Promise.all([
       db.from("career_dna").select("*").eq("device_id", deviceId).maybeSingle(),
       db
         .from("documents")
@@ -68,8 +68,15 @@ async function contextFor(deviceId: string) {
         .eq("device_id", deviceId)
         .order("created_at", { ascending: false })
         .limit(3),
+      db
+        .from("resume_profiles")
+        .select("target_role, contact, experience, education, skills, extras")
+        .eq("device_id", deviceId)
+        .maybeSingle(),
     ]);
     const parts: string[] = [];
+    if (resume)
+      parts.push(`Saved resume on file (real, user-confirmed facts):\n${JSON.stringify(resume).slice(0, 6000)}`);
     if (dna) parts.push(`Known Career DNA: ${JSON.stringify(dna).slice(0, 1500)}`);
     if (docs?.length)
       parts.push(
