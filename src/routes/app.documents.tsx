@@ -90,14 +90,26 @@ function DocsPage() {
           toast.error(`${file.name} is larger than 10 MB`);
           continue;
         }
-        const path = `${deviceId}/${crypto.randomUUID()}-${file.name}`;
-        const { error } = await supabase.storage.from("documents").upload(path, file, {
-          contentType: file.type || "application/octet-stream",
-        });
+        let path: string;
+        let token: string;
+        try {
+          const signed = await createUploadUrl({ data: { deviceId, fileName: file.name } });
+          path = signed.path;
+          token = signed.token;
+        } catch {
+          toast.error(`Upload failed for ${file.name}`);
+          continue;
+        }
+        const { error } = await supabase.storage
+          .from("documents")
+          .uploadToSignedUrl(path, token, file, {
+            contentType: file.type || "application/octet-stream",
+          });
         if (error) {
           toast.error(`Upload failed: ${error.message}`);
           continue;
         }
+
         const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
         let extracted = "";
         let pending: PageExtraction[] | null = null;
