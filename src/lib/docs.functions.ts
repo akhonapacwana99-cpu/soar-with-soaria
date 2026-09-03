@@ -46,6 +46,31 @@ export const listDocs = createServerFn({ method: "POST" })
     return rows ?? [];
   });
 
+// Storage is fully private: no storage.objects policies exist, so the browser
+// cannot read or write the bucket with the publishable key. Uploads go through
+// a short-lived signed URL minted here, with the object path derived from the
+// caller's deviceId so one device can never write into another's prefix.
+export const createUploadUrl = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        deviceId: z.string().min(8).max(128),
+        fileName: z.string().min(1).max(255),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { getDb } = await import("./db.server");
+    const safeName = data.fileName.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-120);
+    const path = `${data.deviceId}/${crypto.randomUUID()}-${safeName}`;
+    const { data: signed, error } = await getDb()
+      .storage.from("documents")
+      .createSignedUploadUrl(path);
+    if (error || !signed) throw new Error("Could not start upload");
+    return { path, token: signed.token };
+  });
+
+
 export const registerDoc = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z
