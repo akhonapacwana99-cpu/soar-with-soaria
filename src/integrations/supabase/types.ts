@@ -240,6 +240,42 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_profiles: {
+        Row: {
+          contact: string
+          created_at: string
+          device_id: string
+          education: string
+          experience: string
+          extras: string
+          skills: string
+          target_role: string
+          updated_at: string
+        }
+        Insert: {
+          contact?: string
+          created_at?: string
+          device_id: string
+          education?: string
+          experience?: string
+          extras?: string
+          skills?: string
+          target_role?: string
+          updated_at?: string
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          device_id?: string
+          education?: string
+          experience?: string
+          extras?: string
+          skills?: string
+          target_role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
