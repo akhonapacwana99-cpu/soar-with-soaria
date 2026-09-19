@@ -99,7 +99,7 @@ export const generateDocument = createServerFn({ method: "POST" })
     z
       .object({
         deviceId: z.string().min(1),
-        tool: z.enum(["cv", "cover-letter", "linkedin", "portfolio", "email"]),
+        tool: z.enum(["cv", "cover-letter", "linkedin", "portfolio", "email", "application"]),
         title: z.string().max(120).optional(),
         inputs: z.record(z.string(), z.string()).default({}),
       })
