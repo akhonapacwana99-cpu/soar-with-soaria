@@ -33,7 +33,7 @@ export function ToolStudio({
   cta = "Generate with Soaria",
   resumeKeys,
 }: {
-  tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email";
+  tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email" | "application";
   icon: LucideIcon;
   title: string;
   description: string;
@@ -138,12 +138,14 @@ export function ToolStudio({
     a.download = `${tool}-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     URL.revokeObjectURL(url);
+    trackEvent("doc_download", { reason: `${tool}:md`, detail: resultName || title });
   };
 
   const downloadPdf = async () => {
     try {
       await exportMarkdownToPdf(resultName || title, result);
       toast.success("PDF downloaded");
+      trackEvent("doc_download", { reason: `${tool}:pdf`, detail: resultName || title });
     } catch {
       toast.error("Couldn't build the PDF. Please try again.");
     }
