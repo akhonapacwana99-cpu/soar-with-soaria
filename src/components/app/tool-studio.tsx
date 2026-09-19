@@ -160,6 +160,7 @@ export function ToolStudio({
     if (!key) return;
     set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
     toast.success(`Imported ${name}`);
+    trackEvent("doc_import", { reason: tool, detail: name });
   };
 
   const importPdf = async (file: File | undefined) => {
