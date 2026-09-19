@@ -30,12 +30,59 @@ function AtsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [query, setQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [jobsBusy, setJobsBusy] = useState(false);
+  const [jobsNote, setJobsNote] = useState<string | null>(null);
+  const [picked, setPicked] = useState<JobPosting | null>(null);
 
   useEffect(() => {
-    setDeviceId(getDeviceId());
-    setResume(localStorage.getItem("ats:resume") ?? "");
+    const d = getDeviceId();
+    setDeviceId(d);
+    const savedResume = localStorage.getItem("ats:resume") ?? "";
+    setResume(savedResume);
     setJd(localStorage.getItem("ats:jd") ?? "");
+    // Seed the search + CV box from the real saved resume so the checker
+    // compares against live adverts for the role they're actually chasing.
+    getResumeProfile({ data: { deviceId: d } })
+      .then((p) => {
+        setQuery((q) => q || (p.target_role ?? "").trim());
+        if (!savedResume.trim()) {
+          const text = [p.target_role, p.contact, p.experience, p.education, p.skills, p.extras]
+            .filter((s) => (s ?? "").trim())
+            .join("\n\n");
+          if (text.trim()) setResume(text);
+        }
+      })
+      .catch(() => undefined);
   }, []);
+
+  const findJobs = async () => {
+    if (query.trim().length < 2) return;
+    setJobsBusy(true);
+    setJobsNote(null);
+    try {
+      const res = await searchJobs({ data: { query: query.trim(), location: location.trim() } });
+      setJobs(res.jobs);
+      setJobsNote(res.warning ?? null);
+    } catch {
+      setJobs([]);
+      setJobsNote("Live job search is unavailable right now. You can still paste an advert below.");
+    } finally {
+      setJobsBusy(false);
+    }
+  };
+
+  const useJob = (job: JobPosting) => {
+    setPicked(job);
+    setJd(job.description);
+    localStorage.setItem("ats:jd", job.description);
+    localStorage.setItem(
+      "apply:job",
+      JSON.stringify({ title: job.title, company: job.company, description: job.description, url: job.url }),
+    );
+  };
 
   const run = async () => {
     setBusy(true);
