@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AlertCircle, FileSearch, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { AlertCircle, Briefcase, ExternalLink, FileSearch, Loader2, RefreshCw, Search, Sparkles } from "lucide-react";
 import { getDeviceId } from "@/lib/device-id";
 import { scoreAts } from "@/lib/studio.functions";
+import { searchJobs } from "@/lib/jobs.functions";
+import type { JobPosting } from "@/lib/jobs.functions";
+import { getResumeProfile } from "@/lib/resume.functions";
 
 export const Route = createFileRoute("/app/ats")({
   head: () => ({
