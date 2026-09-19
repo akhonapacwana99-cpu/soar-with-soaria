@@ -333,7 +333,11 @@ export function ToolStudio({
             {history.map((h) => (
               <li key={h.id}>
                 <button
-                  onClick={() => setResult(h.text)}
+                  onClick={() => {
+                    setResult(h.text);
+                    setResultName(h.name);
+                    trackEvent("doc_open", { reason: tool, detail: h.name });
+                  }}
                   className="flex w-full items-center justify-between gap-3 py-2.5 text-left hover:opacity-80"
                 >
                   <span className="truncate text-sm text-foreground">{h.name}</span>
