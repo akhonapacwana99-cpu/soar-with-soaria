@@ -9,6 +9,7 @@ import type { PageExtraction } from "@/lib/pdf";
 import { PdfImportReview } from "@/components/app/pdf-import-review";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
 import { getResumeProfile, saveResumeProfile } from "@/lib/resume.functions";
+import { trackEvent } from "@/lib/analytics";
 import type { ResumeProfile } from "@/lib/resume.functions";
 
 export type ResumeColumn = keyof Omit<ResumeProfile, "updated_at">;
@@ -32,7 +33,7 @@ export function ToolStudio({
   cta = "Generate with Soaria",
   resumeKeys,
 }: {
-  tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email";
+  tool: "cv" | "cover-letter" | "linkedin" | "portfolio" | "email" | "application";
   icon: LucideIcon;
   title: string;
   description: string;
@@ -137,12 +138,14 @@ export function ToolStudio({
     a.download = `${tool}-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     URL.revokeObjectURL(url);
+    trackEvent("doc_download", { reason: `${tool}:md`, detail: resultName || title });
   };
 
   const downloadPdf = async () => {
     try {
       await exportMarkdownToPdf(resultName || title, result);
       toast.success("PDF downloaded");
+      trackEvent("doc_download", { reason: `${tool}:pdf`, detail: resultName || title });
     } catch {
       toast.error("Couldn't build the PDF. Please try again.");
     }
@@ -157,6 +160,7 @@ export function ToolStudio({
     if (!key) return;
     set(key, [values[key], text].filter(Boolean).join("\n\n").slice(0, 200_000));
     toast.success(`Imported ${name}`);
+    trackEvent("doc_import", { reason: tool, detail: name });
   };
 
   const importPdf = async (file: File | undefined) => {
@@ -329,7 +333,11 @@ export function ToolStudio({
             {history.map((h) => (
               <li key={h.id}>
                 <button
-                  onClick={() => setResult(h.text)}
+                  onClick={() => {
+                    setResult(h.text);
+                    setResultName(h.name);
+                    trackEvent("doc_open", { reason: tool, detail: h.name });
+                  }}
                   className="flex w-full items-center justify-between gap-3 py-2.5 text-left hover:opacity-80"
                 >
                   <span className="truncate text-sm text-foreground">{h.name}</span>

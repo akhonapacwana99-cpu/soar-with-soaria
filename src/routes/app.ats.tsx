@@ -1,8 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AlertCircle, FileSearch, Loader2, RefreshCw, Sparkles } from "lucide-react";
+import { AlertCircle, Briefcase, ExternalLink, FileSearch, Loader2, RefreshCw, Search, Sparkles } from "lucide-react";
 import { getDeviceId } from "@/lib/device-id";
 import { scoreAts } from "@/lib/studio.functions";
+import { searchJobs } from "@/lib/jobs.functions";
+import type { JobPosting } from "@/lib/jobs.functions";
+import { getResumeProfile } from "@/lib/resume.functions";
 
 export const Route = createFileRoute("/app/ats")({
   head: () => ({
@@ -27,12 +30,59 @@ function AtsPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [query, setQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [jobsBusy, setJobsBusy] = useState(false);
+  const [jobsNote, setJobsNote] = useState<string | null>(null);
+  const [picked, setPicked] = useState<JobPosting | null>(null);
 
   useEffect(() => {
-    setDeviceId(getDeviceId());
-    setResume(localStorage.getItem("ats:resume") ?? "");
+    const d = getDeviceId();
+    setDeviceId(d);
+    const savedResume = localStorage.getItem("ats:resume") ?? "";
+    setResume(savedResume);
     setJd(localStorage.getItem("ats:jd") ?? "");
+    // Seed the search + CV box from the real saved resume so the checker
+    // compares against live adverts for the role they're actually chasing.
+    getResumeProfile({ data: { deviceId: d } })
+      .then((p) => {
+        setQuery((q) => q || (p.target_role ?? "").trim());
+        if (!savedResume.trim()) {
+          const text = [p.target_role, p.contact, p.experience, p.education, p.skills, p.extras]
+            .filter((s) => (s ?? "").trim())
+            .join("\n\n");
+          if (text.trim()) setResume(text);
+        }
+      })
+      .catch(() => undefined);
   }, []);
+
+  const findJobs = async () => {
+    if (query.trim().length < 2) return;
+    setJobsBusy(true);
+    setJobsNote(null);
+    try {
+      const res = await searchJobs({ data: { query: query.trim(), location: location.trim() } });
+      setJobs(res.jobs);
+      setJobsNote(res.warning ?? null);
+    } catch {
+      setJobs([]);
+      setJobsNote("Live job search is unavailable right now. You can still paste an advert below.");
+    } finally {
+      setJobsBusy(false);
+    }
+  };
+
+  const useJob = (job: JobPosting) => {
+    setPicked(job);
+    setJd(job.description);
+    localStorage.setItem("ats:jd", job.description);
+    localStorage.setItem(
+      "apply:job",
+      JSON.stringify({ title: job.title, company: job.company, description: job.description, url: job.url }),
+    );
+  };
 
   const run = async () => {
     setBusy(true);
@@ -64,7 +114,78 @@ function AtsPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <section className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <Briefcase className="h-3.5 w-3.5" /> Live job openings
+        </p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && findJobs()}
+            placeholder="Job title, e.g. data analyst"
+            className="min-w-0 flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-ring/30 focus:ring-2"
+          />
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && findJobs()}
+            placeholder="Location (optional)"
+            className="min-w-0 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-ring/30 focus:ring-2 sm:w-52"
+          />
+          <button
+            onClick={findJobs}
+            disabled={jobsBusy || query.trim().length < 2}
+            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          >
+            {jobsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Find jobs
+          </button>
+        </div>
+        {jobsNote && <p className="mt-3 text-xs text-muted-foreground">{jobsNote}</p>}
+        {jobs.length > 0 && (
+          <ul className="mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">
+            {jobs.map((j) => (
+              <li
+                key={j.id}
+                className={`rounded-xl border p-3 ${picked?.id === j.id ? "border-primary bg-primary/5" : "border-border"}`}
+              >
+                <p className="text-sm font-medium text-foreground">{j.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {j.company} · {j.location || "Remote"} · {j.source}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => useJob(j)}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    {picked?.id === j.id ? "Loaded below" : "Compare my CV"}
+                  </button>
+                  <Link
+                    to="/app/apply"
+                    onClick={() => useJob(j)}
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                  >
+                    Draft application
+                  </Link>
+                  {j.url && (
+                    <a
+                      href={j.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      <ExternalLink className="h-3 w-3" /> View advert
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-muted-foreground">Your CV text</span>
