@@ -30,6 +30,7 @@ const groups: { label: string; items: Item[] }[] = [
       { to: "/app/documents", label: "Document Workspace", icon: FolderKanban },
       { to: "/app/cv", label: "CV Builder", icon: FileText },
       { to: "/app/cover-letter", label: "Cover Letter", icon: Mail },
+      { to: "/app/apply", label: "Job Application", icon: Briefcase },
       { to: "/app/ats", label: "ATS Checker", icon: FileSearch },
       { to: "/app/linkedin", label: "LinkedIn Optimizer", icon: Linkedin },
       { to: "/app/portfolio", label: "Portfolio Builder", icon: Layers },

@@ -35,6 +35,7 @@ import { Route as AppDnaRouteImport } from './routes/app.dna'
 import { Route as AppCvRouteImport } from './routes/app.cv'
 import { Route as AppCoverLetterRouteImport } from './routes/app.cover-letter'
 import { Route as AppAtsRouteImport } from './routes/app.ats'
+import { Route as AppApplyRouteImport } from './routes/app.apply'
 import { Route as AppAchievementsRouteImport } from './routes/app.achievements'
 import { Route as AppAboutRouteImport } from './routes/app.about'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -178,6 +179,11 @@ const AppAtsRoute = AppAtsRouteImport.update({
   path: '/ats',
   getParentRoute: () => AppRoute,
 } as any)
+const AppApplyRoute = AppApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAchievementsRoute = AppAchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/app/about': typeof AppAboutRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/apply': typeof AppApplyRoute
   '/app/ats': typeof AppAtsRoute
   '/app/cover-letter': typeof AppCoverLetterRoute
   '/app/cv': typeof AppCvRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/app/about': typeof AppAboutRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/apply': typeof AppApplyRoute
   '/app/ats': typeof AppAtsRoute
   '/app/cover-letter': typeof AppCoverLetterRoute
   '/app/cv': typeof AppCvRoute
@@ -339,6 +347,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/app/about': typeof AppAboutRoute
   '/app/achievements': typeof AppAchievementsRoute
+  '/app/apply': typeof AppApplyRoute
   '/app/ats': typeof AppAtsRoute
   '/app/cover-letter': typeof AppCoverLetterRoute
   '/app/cv': typeof AppCvRoute
@@ -382,6 +391,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/app/about'
     | '/app/achievements'
+    | '/app/apply'
     | '/app/ats'
     | '/app/cover-letter'
     | '/app/cv'
@@ -420,6 +430,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/app/about'
     | '/app/achievements'
+    | '/app/apply'
     | '/app/ats'
     | '/app/cover-letter'
     | '/app/cv'
@@ -461,6 +472,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/app/about'
     | '/app/achievements'
+    | '/app/apply'
     | '/app/ats'
     | '/app/cover-letter'
     | '/app/cv'
@@ -679,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAtsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/apply': {
+      id: '/app/apply'
+      path: '/apply'
+      fullPath: '/app/apply'
+      preLoaderRoute: typeof AppApplyRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/achievements': {
       id: '/app/achievements'
       path: '/achievements'
@@ -804,6 +823,7 @@ const MarketingRouteWithChildren = MarketingRoute._addFileChildren(
 interface AppRouteChildren {
   AppAboutRoute: typeof AppAboutRoute
   AppAchievementsRoute: typeof AppAchievementsRoute
+  AppApplyRoute: typeof AppApplyRoute
   AppAtsRoute: typeof AppAtsRoute
   AppCoverLetterRoute: typeof AppCoverLetterRoute
   AppCvRoute: typeof AppCvRoute
@@ -833,6 +853,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAboutRoute: AppAboutRoute,
   AppAchievementsRoute: AppAchievementsRoute,
+  AppApplyRoute: AppApplyRoute,
   AppAtsRoute: AppAtsRoute,
   AppCoverLetterRoute: AppCoverLetterRoute,
   AppCvRoute: AppCvRoute,
