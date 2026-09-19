@@ -114,7 +114,78 @@ function AtsPage() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <section className="mt-8 rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <Briefcase className="h-3.5 w-3.5" /> Live job openings
+        </p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && findJobs()}
+            placeholder="Job title, e.g. data analyst"
+            className="min-w-0 flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-ring/30 focus:ring-2"
+          />
+          <input
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && findJobs()}
+            placeholder="Location (optional)"
+            className="min-w-0 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none ring-ring/30 focus:ring-2 sm:w-52"
+          />
+          <button
+            onClick={findJobs}
+            disabled={jobsBusy || query.trim().length < 2}
+            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+          >
+            {jobsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            Find jobs
+          </button>
+        </div>
+        {jobsNote && <p className="mt-3 text-xs text-muted-foreground">{jobsNote}</p>}
+        {jobs.length > 0 && (
+          <ul className="mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">
+            {jobs.map((j) => (
+              <li
+                key={j.id}
+                className={`rounded-xl border p-3 ${picked?.id === j.id ? "border-primary bg-primary/5" : "border-border"}`}
+              >
+                <p className="text-sm font-medium text-foreground">{j.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {j.company} · {j.location || "Remote"} · {j.source}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => useJob(j)}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                  >
+                    {picked?.id === j.id ? "Loaded below" : "Compare my CV"}
+                  </button>
+                  <Link
+                    to="/app/apply"
+                    onClick={() => useJob(j)}
+                    className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                  >
+                    Draft application
+                  </Link>
+                  {j.url && (
+                    <a
+                      href={j.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      <ExternalLink className="h-3 w-3" /> View advert
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-muted-foreground">Your CV text</span>
