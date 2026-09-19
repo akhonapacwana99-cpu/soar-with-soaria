@@ -9,6 +9,7 @@ import type { PageExtraction } from "@/lib/pdf";
 import { PdfImportReview } from "@/components/app/pdf-import-review";
 import { generateDocument, listGenerated } from "@/lib/studio.functions";
 import { getResumeProfile, saveResumeProfile } from "@/lib/resume.functions";
+import { trackEvent } from "@/lib/analytics";
 import type { ResumeProfile } from "@/lib/resume.functions";
 
 export type ResumeColumn = keyof Omit<ResumeProfile, "updated_at">;
