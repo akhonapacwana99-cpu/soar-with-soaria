@@ -20,6 +20,9 @@ export const Route = createFileRoute("/app/cover-letter")({
       title="Cover Letter"
       description="A tailored, one-page letter that connects your real experience to what this specific role is asking for."
       cta="Write my letter"
+      resumeKeys={{
+        experience: "Your relevant experience",
+      }}
       fields={[
         { key: "Role and company", label: "Role and company", placeholder: "e.g. Marketing Assistant at Nando's", rows: 1 },
         { key: "Job description", label: "Job description", placeholder: "Paste the advert or the key requirements", rows: 7 },
