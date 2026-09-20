@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, Target, Trophy, ArrowRight, MessageCircle, FileText, Compass, GraduationCap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Sparkles, Target, Trophy, ArrowRight, MessageCircle, FileText, Compass, GraduationCap, Loader2 } from "lucide-react";
+import { getDeviceId } from "@/lib/device-id";
+import { computeReadiness, type Readiness } from "@/lib/readiness.functions";
+import { getDna, type DnaRow } from "@/lib/dna.functions";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({
@@ -13,8 +17,55 @@ export const Route = createFileRoute("/app/")({
 
 const stages = ["Seeker", "Explorer", "Dreamer", "Scholar", "Builder", "Trailblazer", "Professional", "Leader", "Dragon", "Phoenix", "Legacy"];
 
+// Map a 0–100 readiness score to an Ascension Journey stage index.
+function stageFromReadiness(total: number): number {
+  if (total <= 0) return 0; // Seeker
+  return Math.min(stages.length - 1, Math.floor(total / 10));
+}
+
+function dnaSummary(dna: DnaRow): string {
+  const counts =
+    dna.strengths.length +
+    dna.skills.length +
+    dna.interests.length +
+    dna.core_values.length;
+  if (counts === 0) return "Your Career DNA is still forming.";
+
+  const traits: string[] = [];
+  if (dna.strengths.length) traits.push(`a ${dna.strengths[0]}`);
+  if (dna.interests.length) traits.push(`drawn to ${dna.interests[0]}`);
+  if (dna.skills.length) traits.push(`skilled in ${dna.skills[0]}`);
+
+  if (traits.length >= 2) {
+    return `You're ${traits.slice(0, -1).join(", ")} and ${traits[traits.length - 1]}.`;
+  }
+  if (traits.length === 1) {
+    return `You're ${traits[0]}.`;
+  }
+  return "Your Career DNA is still forming.";
+}
+
 function Dashboard() {
-  const currentStage = 1; // Explorer
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [dna, setDna] = useState<DnaRow | null>(null);
+
+  useEffect(() => {
+    const d = getDeviceId();
+    computeReadiness({ data: { deviceId: d } }).then(setReadiness);
+    getDna({ data: { deviceId: d } }).then(setDna);
+  }, []);
+
+  if (!readiness || !dna) {
+    return (
+      <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const ring = Math.max(0, Math.min(100, readiness.total));
+  const currentStage = stageFromReadiness(ring);
+  const isNewUser = ring === 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
@@ -22,7 +73,7 @@ function Dashboard() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-accent-foreground/70">Welcome back</p>
           <h1 className="mt-2 font-display text-3xl font-semibold text-foreground md:text-4xl">
-            Good to see you, <span className="text-gradient-brand">Explorer.</span>
+            Good to see you, <span className="text-gradient-brand">{stages[currentStage]}.</span>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">Success delayed is not success denied. Here's where you are today.</p>
         </div>
@@ -40,11 +91,13 @@ function Dashboard() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Readiness</p>
             <Target className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-4 font-display text-4xl font-semibold text-foreground">42<span className="text-lg text-muted-foreground">/100</span></p>
+          <p className="mt-4 font-display text-4xl font-semibold text-foreground">{ring}<span className="text-lg text-muted-foreground">/100</span></p>
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-[42%] bg-gradient-brand" />
+            <div className="h-full bg-gradient-brand transition-all" style={{ width: `${ring}%` }} />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Complete your Career DNA to unlock more.</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {isNewUser ? "Complete your Career DNA to unlock more." : "Keep building momentum — every action counts."}
+          </p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6">
@@ -52,7 +105,7 @@ function Dashboard() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">Career DNA</p>
             <Sparkles className="h-4 w-4 text-primary" />
           </div>
-          <p className="mt-4 text-sm text-foreground">You're a <strong>curious learner</strong> with early signs of <strong>analytical strength</strong>.</p>
+          <p className="mt-4 text-sm text-foreground">{dnaSummary(dna)}</p>
           <Link to="/app/dna" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
             Explore your DNA <ArrowRight className="h-3.5 w-3.5" />
           </Link>
@@ -64,7 +117,9 @@ function Dashboard() {
             <Trophy className="h-4 w-4 text-accent" />
           </div>
           <p className="mt-4 font-display text-3xl font-semibold">{stages[currentStage]}</p>
-          <p className="mt-2 text-xs text-ivory/70">Next: {stages[currentStage + 1]}</p>
+          <p className="mt-2 text-xs text-ivory/70">
+            {currentStage < stages.length - 1 ? `Next: ${stages[currentStage + 1]}` : "You've reached the summit."}
+          </p>
         </div>
       </div>
 
